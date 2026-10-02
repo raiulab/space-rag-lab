@@ -1,0 +1,10 @@
+{"id":"moon-01","question":"月面観測装置の昼間運用に採用された放熱塗装と最高温度は？","answerable":true,"expected_document_ids":["moon_thermal_2026"],"answer_keywords":["放熱塗装A","78 ℃"]}
+{"id":"moon-02","question":"多層断熱材によってヒーター消費電力は何Wから何Wへ減りましたか？","answerable":true,"expected_document_ids":["moon_thermal_2026"],"answer_keywords":["20 W","16 W"]}
+{"id":"mars-01","question":"火星の模擬砂嵐で太陽電池出力は通常時の何%まで低下しましたか？","answerable":true,"expected_document_ids":["mars_power_2026"],"answer_keywords":["32 %"]}
+{"id":"mars-02","question":"満充電の蓄電池だけで重要機器を何時間維持できましたか？","answerable":true,"expected_document_ids":["mars_power_2026"],"answer_keywords":["18時間"]}
+{"id":"europa-01","question":"エウロパ探査機の片道通信時間として設定された範囲は？","answerable":true,"expected_document_ids":["europa_comm_2026"],"answer_keywords":["33分","53分"]}
+{"id":"europa-02","question":"TMR方式は30日間の模擬試験で検出したビット反転にどう対応しましたか？","answerable":true,"expected_document_ids":["europa_comm_2026"],"answer_keywords":["3回","多数決"]}
+{"id":"policy-01","question":"回答の根拠にはどの3種類の識別情報を付けますか？","answerable":true,"expected_document_ids":["mission_ops_policy_2026"],"answer_keywords":["文書ID","ページ","チャンクID"]}
+{"id":"policy-02","question":"答えが文書にない質問は評価セットの何%以上にしますか？","answerable":true,"expected_document_ids":["mission_ops_policy_2026"],"answer_keywords":["20 %以上"]}
+{"id":"unknown-01","question":"月面基地で生活する乗員は何人ですか？","answerable":false,"expected_document_ids":[],"answer_keywords":[]}
+{"id":"unknown-02","question":"エウロパ探査機の打ち上げロケット名は何ですか？","answerable":false,"expected_document_ids":[],"answer_keywords":[]}

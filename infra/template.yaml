@@ -1,0 +1,78 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Space Research RAG Lab - learning deployment
+
+Parameters:
+  BedrockModelId:
+    Type: String
+    Default: ""
+    Description: Bedrock model ID or inference profile ID available in this region
+  Generator:
+    Type: String
+    Default: bedrock
+    AllowedValues:
+      - extractive
+      - bedrock
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Architectures:
+      - arm64
+    MemorySize: 512
+    Timeout: 30
+    Tracing: Active
+    Environment:
+      Variables:
+        RAG_LAB_GENERATOR: !Ref Generator
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        RAG_INDEX_PATH: /var/task/data/index/index.jsonl
+        RAG_PROMPT_PATH: /var/task/prompts/answer_v2_grounded.txt
+        RAG_SEARCH_MODE: hybrid
+        RAG_TOP_K: "5"
+
+Resources:
+  RagApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: v1
+
+  AskFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ".."
+      Handler: src.rag_lab.aws_handler.lambda_handler
+      Description: Answers questions using the bundled synthetic training index
+      ReservedConcurrentExecutions: 2
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Statement:
+            - Sid: InvokeSelectedBedrockModels
+              Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource:
+                - !Sub arn:${AWS::Partition}:bedrock:*::foundation-model/*
+                - !Sub arn:${AWS::Partition}:bedrock:*:${AWS::AccountId}:inference-profile/*
+      Events:
+        Ask:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref RagApi
+            Path: /ask
+            Method: POST
+
+  AskFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AskFunction}
+      RetentionInDays: 14
+
+Outputs:
+  AskEndpoint:
+    Description: POST a JSON body containing a question
+    Value: !Sub https://${RagApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}/v1/ask
+  FunctionName:
+    Value: !Ref AskFunction

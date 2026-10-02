@@ -1,0 +1,13 @@
+.venv/
+.rag_lab/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.env
+data/processed/*.jsonl
+data/index/*.jsonl
+reports/*.json
+reports/*.csv
+.DS_Store
