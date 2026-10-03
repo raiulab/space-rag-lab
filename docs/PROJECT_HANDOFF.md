@@ -227,6 +227,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/evaluation.py`: 検索、引用、キーワード、回答可能性の評価
 - `src/rag_lab/source_documents.py`: 形式共通の文書・ページ・ブロック型とチャンク変換
 - `src/rag_lab/pdf_ingest.py`: `pypdf`によるPDF検証、ページ抽出、品質警告
+- `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件のサービス層
 - `src/rag_lab/cli.py`: ingest、ingest-pdf、index、search、ask、summarize、evaluate、all
 
 ### 6.3 APIとAWS
@@ -246,7 +247,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で22件ある。PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。PDF extraがない環境では、PDF解析を必要とするテストだけをskipし、コアのテスト経路を維持する。
+標準ライブラリの`unittest`で34件ある。PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。PDF extraがない環境では、PDF解析を必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -289,7 +290,7 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 - FastAPIの検索・要約エンドポイントは未実装である。
 - AWS SAMテンプレートは作成済みだが、SAM CLIによる実デプロイ検証はしていない。
 - 学習進捗、問題診断、ヒント、レポート作成を案内するUIは未実装である。
-- dataset単位の`.rag_lab/`保存、ページ抽出JSONL、完了判定、PDF原本との並列比較は未実装である。
+- PDF原本と抽出テキストの並列比較を含むStreamlit画面は未実装である。
 - PDF取り込みは文字レイヤーだけに対応し、OCR、表構造、図、一般画像解析は未実装である。
 
 これらを、説明なしに「不具合だから全部直す」のではなく、どれを教材として維持し、どれを学習アプリ側で案内するか区別すること。
@@ -355,7 +356,7 @@ Labごとの詳細な作業と合格条件は`docs/LABS.md`を参照する。
 
 最初の縦切りはLab 1だけに限定する。付属Markdown/TXTとテキストPDFの取り込み、抽出比較、チャンク検査、完了判定、ローカル進捗保存を完成させてからLab 2へ進み、その後8 Labへ広げる。
 
-状態: 2026-10-03にPDF取り込み基盤を実装した。共通文書型、PDFアダプター、`rag-lab ingest-pdf`、合成fixture、異常系テストは完了している。次はdataset単位の保存とLab 1サービス層、続いてStreamlit画面を実装する。
+状態: 2026-10-03にPDF取り込み基盤とLab 1サービス層を実装した。共通文書型、PDFアダプター、`rag-lab ingest-pdf`、合成fixture、異常系テスト、dataset単位の保存、進捗、完了判定は完了している。次はStreamlit画面と`rag-lab ui`を実装する。
 
 ### Milestone 3: 問題診断と比較
 

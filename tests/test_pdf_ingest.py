@@ -31,6 +31,10 @@ class PdfEarlyValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(PdfValidationError, "サイズ上限"):
             extract_pdf(FIXTURE, document_id="too_large", max_bytes=10)
 
+    def test_absolute_source_path_is_not_accepted(self) -> None:
+        with self.assertRaisesRegex(PdfValidationError, "絶対パス"):
+            extract_pdf(FIXTURE, document_id="unsafe_source", source="/private/report")
+
 
 @unittest.skipUnless(HAS_PYPDF, "PDF extra is not installed")
 class PdfIngestTests(unittest.TestCase):

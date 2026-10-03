@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import logging
 import re
 from dataclasses import asdict, dataclass
-from pathlib import Path
+from pathlib import Path, PureWindowsPath
 from typing import Any, Literal
 
 from .source_documents import ContentBlock, SourceDocument, SourcePage
@@ -73,6 +74,18 @@ def validate_document_id(document_id: str) -> None:
         )
 
 
+def validate_source(source: str) -> None:
+    if (
+        Path(source).is_absolute()
+        or PureWindowsPath(source).is_absolute()
+        or source.lower().startswith("file:")
+    ):
+        raise PdfValidationError(
+            "sourceには絶対パスではなく、"
+            "表示名または出典URLを指定してください"
+        )
+
+
 def _load_pypdf() -> Any:
     try:
         import pypdf
@@ -100,6 +113,14 @@ def _validate_pdf_file(path: Path, max_bytes: int) -> int:
     if signature != PDF_SIGNATURE:
         raise PdfValidationError("PDFシグネチャを確認できません")
     return size
+
+
+def _sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def _open_reader(path: Path, pypdf: Any) -> Any:
@@ -135,7 +156,13 @@ def extract_pdf(
     """Extract an unencrypted text-layer PDF into the common source model."""
 
     validate_document_id(document_id)
+    if source:
+        validate_source(source)
     file_size = _validate_pdf_file(path, max_bytes)
+    try:
+        file_sha256 = _sha256_file(path)
+    except OSError as error:
+        raise PdfValidationError("PDFファイルを読み取れません") from error
     pypdf = _load_pypdf()
     reader = _open_reader(path, pypdf)
 
@@ -219,6 +246,7 @@ def extract_pdf(
         "classification": classification,
         "original_filename": path.name,
         "file_size_bytes": file_size,
+        "sha256": file_sha256,
         "page_count": page_count,
         "extractor": "pypdf",
         "extractor_version": pypdf.__version__,
