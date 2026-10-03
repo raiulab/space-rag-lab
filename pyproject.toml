@@ -14,6 +14,7 @@ dependencies = []
 api = ["fastapi>=0.110", "uvicorn>=0.29"]
 aws = ["boto3>=1.34"]
 pdf = ["pypdf>=6.10,<7"]
+ui = ["streamlit[pdf]>=1.65,<2"]
 dev = ["pytest>=8", "ruff>=0.5"]
 
 [project.scripts]

@@ -86,6 +86,11 @@ def validate_source(source: str) -> None:
         )
 
 
+def sanitize_display_filename(filename: str) -> str:
+    name = Path(PureWindowsPath(filename).name).name
+    return name or "uploaded.pdf"
+
+
 def _load_pypdf() -> Any:
     try:
         import pypdf
@@ -150,6 +155,7 @@ def extract_pdf(
     source: str | None = None,
     classification: str = "user_provided",
     note: str = "",
+    original_filename: str | None = None,
     max_bytes: int = MAX_PDF_BYTES,
     max_pages: int = MAX_PDF_PAGES,
 ) -> PdfExtractionResult:
@@ -242,9 +248,10 @@ def extract_pdf(
     else:
         status = "ok"
 
+    display_filename = sanitize_display_filename(original_filename or path.name)
     metadata: dict[str, Any] = {
         "classification": classification,
-        "original_filename": path.name,
+        "original_filename": display_filename,
         "file_size_bytes": file_size,
         "sha256": file_sha256,
         "page_count": page_count,
@@ -256,8 +263,8 @@ def extract_pdf(
 
     document = SourceDocument(
         document_id=document_id,
-        title=title or path.stem,
-        source=source or path.name,
+        title=title or Path(display_filename).stem,
+        source=source or display_filename,
         media_type=PDF_MEDIA_TYPE,
         metadata=metadata,
         pages=pages,

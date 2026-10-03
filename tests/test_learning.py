@@ -8,6 +8,11 @@ from pathlib import Path
 from unittest import mock
 
 from rag_lab.learning.checks import Lab1Completion, evaluate_lab1, warning_id
+from rag_lab.learning.lab1 import (
+    prepare_bundled_data,
+    prepare_pdf_upload,
+    save_prepared_bundled,
+)
 from rag_lab.learning.progress import ProgressStore, write_json_atomic
 from rag_lab.learning.storage import (
     DatasetAlreadyExistsError,
@@ -20,6 +25,7 @@ from rag_lab.source_documents import chunk_source_document
 
 HAS_PYPDF = importlib.util.find_spec("pypdf") is not None
 FIXTURE = Path(__file__).parent / "fixtures" / "lab1_text_sample.pdf"
+RAW_DIR = Path(__file__).parents[1] / "data" / "raw"
 
 
 def sample_chunk() -> Chunk:
@@ -134,6 +140,37 @@ class ProgressStoreTests(unittest.TestCase):
         self.assertEqual(updated["labs"]["lab1"]["status"], "in_progress")
 
 
+class BundledDatasetTests(unittest.TestCase):
+    def test_bundled_dataset_can_complete_and_be_reused_by_lab2(self) -> None:
+        prepared = prepare_bundled_data(RAW_DIR, chunk_size=650)
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / ".rag_lab"
+            saved = save_prepared_bundled(
+                workspace,
+                prepared,
+                prediction="4文書20チャンクと予想",
+                observation="文書IDとページが全チャンクに残った",
+            )
+            manifest = json.loads(
+                (saved.dataset_path / "manifest.json").read_text(encoding="utf-8")
+            )
+            chunk_lines = (
+                saved.dataset_path / "processed" / "chunks.jsonl"
+            ).read_text(encoding="utf-8").splitlines()
+            saved_text = "\n".join(
+                path.read_text(encoding="utf-8")
+                for path in workspace.rglob("*.json*")
+            )
+
+        self.assertEqual(prepared.document_count, 4)
+        self.assertEqual(len(prepared.chunks), 20)
+        self.assertEqual(manifest["source_kind"], "bundled_markdown_text")
+        self.assertEqual(manifest["document_count"], 4)
+        self.assertEqual(len(chunk_lines), 20)
+        self.assertNotIn(str(RAW_DIR.resolve()), saved_text)
+        self.assertTrue(saved.completion.completed)
+
+
 @unittest.skipUnless(HAS_PYPDF, "PDF extra is not installed")
 class DatasetStorageTests(unittest.TestCase):
     def setUp(self) -> None:
@@ -153,6 +190,19 @@ class DatasetStorageTests(unittest.TestCase):
             license_terms="self-created fixture",
             save_raw=save_raw,
         )
+
+    def test_upload_filename_is_display_only(self) -> None:
+        prepared = prepare_pdf_upload(
+            FIXTURE.read_bytes(),
+            "../unsafe/../../report.pdf",
+            document_id="safe_upload",
+        )
+
+        self.assertEqual(prepared.filename, "report.pdf")
+        self.assertEqual(
+            prepared.extraction.document.metadata["original_filename"], "report.pdf"
+        )
+        self.assertEqual(prepared.extraction.document.source, "report.pdf")
 
     def test_dataset_files_and_progress_are_saved_without_absolute_path(self) -> None:
         with tempfile.TemporaryDirectory() as directory:

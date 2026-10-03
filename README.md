@@ -66,7 +66,20 @@ rag-lab summarize europa_comm_2026
 
 ローカル学習ナビゲーションアプリの初期設計、PDF対応範囲、保存形式、テスト、受け入れ条件は [docs/LOCAL_LEARNING_APP_DESIGN.md](docs/LOCAL_LEARNING_APP_DESIGN.md) にまとめています。
 
-## Lab 1のPDF取り込み
+## ローカル学習ナビゲーション
+
+Lab 1はブラウザ画面から進められます。StreamlitとPDF機能を追加し、プロジェクトルートから起動してください。
+
+```bash
+python -m pip install -e '.[ui,pdf]'
+rag-lab ui
+```
+
+画面は`127.0.0.1`だけで待ち受け、Streamlitの利用統計送信を無効にします。全8 Labの状態、Python・PDF環境、Lab 1の学習目標を表示し、「付属Markdown/TXT」と「自分のPDF」のどちらか一方を選べます。
+
+Lab 1では、実行前の予想、加工結果、文書・ページ・チャンク数、出典、実行後の観察、完了条件を順に確認します。PDFでは元PDFとページ別抽出テキストを並べ、警告を確認してから記録します。結果は`.rag_lab/`へ保存され、Git対象にはなりません。
+
+### PDF取り込みCLI
 
 文字レイヤー付きPDFをページ単位で抽出し、既存の`Chunk`形式へ変換できます。PDF機能だけを追加でインストールしてください。
 
@@ -84,8 +97,6 @@ rag-lab ingest-pdf INPUT.pdf \
 対応上限は1件25 MB、200ページで、暗号化されていない文字レイヤー付きPDFが対象です。スキャンPDFのOCR、表・図、一般画像解析はまだ対象外です。元PDFを正解と考えず、ページ表示と抽出テキストを目視比較してください。
 
 PDF結果を`.rag_lab/datasets/<dataset_id>/`へ保存するサービス層も実装済みです。manifest、ページ、チャンク、実行記録、完了検査をdataset単位で保持し、既存datasetを上書きしません。PDF原本は明示指定時だけ`raw/source.pdf`へ保存します。
-
-次の開発段階では、既存CLIを維持したまま、Lab 1を案内するStreamlitアプリと正式コマンド`rag-lab ui`を追加します。進捗・完了判定の内部サービスは実装済みですが、画面、PDFページとの並列比較、操作フローはまだ実装されていません。
 
 初期対応は、付属Markdown/TXTと、暗号化されていない文字レイヤー付きPDF 1件です。個人の進捗と実データはGit対象外の`.rag_lab/`へ保存し、生PDFはUIから明示選択された場合だけ保存する設計です。
 

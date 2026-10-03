@@ -11,6 +11,10 @@ RAGではLLMより先に、出典を失わず文書を検索単位へ変える�
 ### 実行
 
 ```bash
+python -m pip install -e '.[ui,pdf]'
+rag-lab ui
+
+# CLIで付属データだけを実行する場合
 rag-lab ingest --chunk-size 650
 head -n 2 data/processed/chunks.jsonl
 ```

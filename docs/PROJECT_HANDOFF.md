@@ -228,7 +228,8 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/source_documents.py`: 形式共通の文書・ページ・ブロック型とチャンク変換
 - `src/rag_lab/pdf_ingest.py`: `pypdf`によるPDF検証、ページ抽出、品質警告
 - `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件のサービス層
-- `src/rag_lab/cli.py`: ingest、ingest-pdf、index、search、ask、summarize、evaluate、all
+- `src/rag_lab/ui/`: Lab一覧、環境確認、付属データ・PDFのLab 1画面
+- `src/rag_lab/cli.py`: ui、ingest、ingest-pdf、index、search、ask、summarize、evaluate、all
 
 ### 6.3 APIとAWS
 
@@ -247,7 +248,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で34件ある。PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。PDF extraがない環境では、PDF解析を必要とするテストだけをskipし、コアのテスト経路を維持する。
+標準ライブラリの`unittest`で40件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -277,6 +278,8 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 
 2026-10-03には、合成3ページPDFによる`rag-lab ingest-pdf`も確認した。1、2ページ目から2チャンクを生成し、意図的な空白3ページ目を`EMPTY_PAGE`、`SHORT_PAGE`として警告し、空ページ率33%のため`needs_review`を返した。暗号化、破損、25 MB上限、200ページ上限、全文字抽出不可の`OCR_REQUIRED`も単体テストで固定している。
 
+同日、Streamlit 1.65.0と`streamlit-pdf` 2.1.0で`rag-lab ui`を実装した。AppTestで初期画面と付属データ経路を確認し、実サーバーが`http://127.0.0.1:8501`で起動してヘルスチェックへ応答することを確認した。利用統計送信は無効である。
+
 ## 8. 意図的に残している問題
 
 初期実装は完成版ではない。次の問題はLab 6と7の教材として残している。
@@ -289,8 +292,8 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 - プロンプト比較はBedrock等のLLMを接続しなければ十分に評価できない。
 - FastAPIの検索・要約エンドポイントは未実装である。
 - AWS SAMテンプレートは作成済みだが、SAM CLIによる実デプロイ検証はしていない。
-- 学習進捗、問題診断、ヒント、レポート作成を案内するUIは未実装である。
-- PDF原本と抽出テキストの並列比較を含むStreamlit画面は未実装である。
+- Lab 2以降の操作画面、詳細な問題診断、評価比較、公開レポート作成は未実装である。
+- 公開条件が明確な実在PDF 1件による手動受け入れ試験は未実施である。
 - PDF取り込みは文字レイヤーだけに対応し、OCR、表構造、図、一般画像解析は未実装である。
 
 これらを、説明なしに「不具合だから全部直す」のではなく、どれを教材として維持し、どれを学習アプリ側で案内するか区別すること。
@@ -356,7 +359,7 @@ Labごとの詳細な作業と合格条件は`docs/LABS.md`を参照する。
 
 最初の縦切りはLab 1だけに限定する。付属Markdown/TXTとテキストPDFの取り込み、抽出比較、チャンク検査、完了判定、ローカル進捗保存を完成させてからLab 2へ進み、その後8 Labへ広げる。
 
-状態: 2026-10-03にPDF取り込み基盤とLab 1サービス層を実装した。共通文書型、PDFアダプター、`rag-lab ingest-pdf`、合成fixture、異常系テスト、dataset単位の保存、進捗、完了判定は完了している。次はStreamlit画面と`rag-lab ui`を実装する。
+状態: 2026-10-03にLab 1の最小版を実装した。共通文書型、PDFアダプター、`rag-lab ingest-pdf`、合成fixture、異常系テスト、dataset保存、進捗、完了判定、付属データとPDFのStreamlit画面、`rag-lab ui`が動作する。公開実データ1件の受け入れ試験を除き、最初の縦切りは完了している。
 
 ### Milestone 3: 問題診断と比較
 

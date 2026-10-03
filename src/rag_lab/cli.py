@@ -14,6 +14,7 @@ from .pdf_ingest import PdfIngestError, extract_pdf
 from .pipeline import RAGPipeline
 from .retrieval import Retriever
 from .source_documents import chunk_source_document
+from .ui.launcher import UiDependencyError, launch_ui
 
 
 DEFAULT_RAW = Path("data/raw")
@@ -77,6 +78,14 @@ def command_ingest_pdf(args: argparse.Namespace) -> None:
     write_chunks(chunks, args.output)
     summary["output"] = str(args.output)
     _print_json(summary)
+
+
+def command_ui(args: argparse.Namespace) -> None:
+    del args
+    try:
+        launch_ui()
+    except UiDependencyError as error:
+        raise SystemExit(str(error)) from error
 
 
 def command_index(args: argparse.Namespace) -> None:
@@ -199,6 +208,9 @@ def build_parser() -> argparse.ArgumentParser:
     ingest_pdf.add_argument("--note", default="")
     ingest_pdf.add_argument("--chunk-size", type=int, default=650)
     ingest_pdf.set_defaults(func=command_ingest_pdf)
+
+    ui = subparsers.add_parser("ui", help="ローカル学習ナビゲーションを起動")
+    ui.set_defaults(func=command_ui)
 
     index = subparsers.add_parser("index", help="Embeddingと索引を生成")
     index.add_argument("--chunks", type=Path, default=DEFAULT_CHUNKS)
