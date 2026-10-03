@@ -10,8 +10,10 @@ from .evaluation import evaluate_pipeline, write_report
 from .generation import make_generator
 from .ingest import collect_chunks, load_chunks, write_chunks
 from .models import SearchResult
+from .pdf_ingest import PdfIngestError, extract_pdf
 from .pipeline import RAGPipeline
 from .retrieval import Retriever
+from .source_documents import chunk_source_document
 
 
 DEFAULT_RAW = Path("data/raw")
@@ -49,6 +51,32 @@ def command_ingest(args: argparse.Namespace) -> None:
             "output": str(args.output),
         }
     )
+
+
+def command_ingest_pdf(args: argparse.Namespace) -> None:
+    try:
+        result = extract_pdf(
+            args.input,
+            document_id=args.document_id,
+            title=args.title,
+            source=args.source,
+            classification=args.classification,
+            note=args.note,
+        )
+        chunks = chunk_source_document(result.document, chunk_size=args.chunk_size)
+    except (PdfIngestError, ValueError) as error:
+        raise SystemExit(str(error)) from error
+
+    summary = result.summary()
+    summary["chunks"] = len(chunks)
+    if result.status == "OCR_REQUIRED":
+        summary["output"] = None
+        _print_json(summary)
+        raise SystemExit(2)
+
+    write_chunks(chunks, args.output)
+    summary["output"] = str(args.output)
+    _print_json(summary)
 
 
 def command_index(args: argparse.Namespace) -> None:
@@ -158,6 +186,19 @@ def build_parser() -> argparse.ArgumentParser:
     ingest.add_argument("--output", type=Path, default=DEFAULT_CHUNKS)
     ingest.add_argument("--chunk-size", type=int, default=650)
     ingest.set_defaults(func=command_ingest)
+
+    ingest_pdf = subparsers.add_parser(
+        "ingest-pdf", help="文字レイヤー付きPDFをチャンクへ変換"
+    )
+    ingest_pdf.add_argument("input", type=Path)
+    ingest_pdf.add_argument("--document-id", required=True)
+    ingest_pdf.add_argument("--output", type=Path, required=True)
+    ingest_pdf.add_argument("--title")
+    ingest_pdf.add_argument("--source")
+    ingest_pdf.add_argument("--classification", default="user_provided")
+    ingest_pdf.add_argument("--note", default="")
+    ingest_pdf.add_argument("--chunk-size", type=int, default=650)
+    ingest_pdf.set_defaults(func=command_ingest_pdf)
 
     index = subparsers.add_parser("index", help="Embeddingと索引を生成")
     index.add_argument("--chunks", type=Path, default=DEFAULT_CHUNKS)

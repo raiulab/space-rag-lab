@@ -1,6 +1,6 @@
 # Space Research RAG Lab プロジェクト引き継ぎ書
 
-最終更新: 2026-10-02
+最終更新: 2026-10-03
 
 この文書は、旧スレッドで行った検討・実装・検証を、新しいCodexプロジェクトの新しいスレッドへ引き継ぐための永続的なコンテキストである。新しいスレッドは会話履歴を知っていると仮定せず、この文書、`AGENTS.md`、`README.md`、`docs/LABS.md`、実際のコードとテストを情報源として扱うこと。
 
@@ -225,7 +225,9 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/generation.py`: 抽出式生成器、Amazon Bedrock生成器
 - `src/rag_lab/pipeline.py`: 検索、生成、引用を接続するRAGパイプライン
 - `src/rag_lab/evaluation.py`: 検索、引用、キーワード、回答可能性の評価
-- `src/rag_lab/cli.py`: ingest、index、search、ask、summarize、evaluate、all
+- `src/rag_lab/source_documents.py`: 形式共通の文書・ページ・ブロック型とチャンク変換
+- `src/rag_lab/pdf_ingest.py`: `pypdf`によるPDF検証、ページ抽出、品質警告
+- `src/rag_lab/cli.py`: ingest、ingest-pdf、index、search、ask、summarize、evaluate、all
 
 ### 6.3 APIとAWS
 
@@ -244,7 +246,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で9件ある。直近の確認ではすべて成功している。
+標準ライブラリの`unittest`で22件ある。PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。PDF extraがない環境では、PDF解析を必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -272,6 +274,8 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHTTP 200と引用を返した。
 
+2026-10-03には、合成3ページPDFによる`rag-lab ingest-pdf`も確認した。1、2ページ目から2チャンクを生成し、意図的な空白3ページ目を`EMPTY_PAGE`、`SHORT_PAGE`として警告し、空ページ率33%のため`needs_review`を返した。暗号化、破損、25 MB上限、200ページ上限、全文字抽出不可の`OCR_REQUIRED`も単体テストで固定している。
+
 ## 8. 意図的に残している問題
 
 初期実装は完成版ではない。次の問題はLab 6と7の教材として残している。
@@ -285,6 +289,8 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 - FastAPIの検索・要約エンドポイントは未実装である。
 - AWS SAMテンプレートは作成済みだが、SAM CLIによる実デプロイ検証はしていない。
 - 学習進捗、問題診断、ヒント、レポート作成を案内するUIは未実装である。
+- dataset単位の`.rag_lab/`保存、ページ抽出JSONL、完了判定、PDF原本との並列比較は未実装である。
+- PDF取り込みは文字レイヤーだけに対応し、OCR、表構造、図、一般画像解析は未実装である。
 
 これらを、説明なしに「不具合だから全部直す」のではなく、どれを教材として維持し、どれを学習アプリ側で案内するか区別すること。
 
@@ -348,6 +354,8 @@ Labごとの詳細な作業と合格条件は`docs/LABS.md`を参照する。
 - ローカル進捗保存
 
 最初の縦切りはLab 1だけに限定する。付属Markdown/TXTとテキストPDFの取り込み、抽出比較、チャンク検査、完了判定、ローカル進捗保存を完成させてからLab 2へ進み、その後8 Labへ広げる。
+
+状態: 2026-10-03にPDF取り込み基盤を実装した。共通文書型、PDFアダプター、`rag-lab ingest-pdf`、合成fixture、異常系テストは完了している。次はdataset単位の保存とLab 1サービス層、続いてStreamlit画面を実装する。
 
 ### Milestone 3: 問題診断と比較
 
@@ -426,11 +434,11 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 PYTHONPATH=src python3 -m rag_lab.cli all
 ```
 
-## 15. 実装開始前の状態
+## 15. 現在の実装状態
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-未実施の状態変更はGit初期化である。現在の作業ディレクトリには`.git`がないため、小さなコミットと差分レビューを行う場合は、実装開始前にユーザーへGit初期化の許可を求める。許可なしに初期化しない。
+Gitは初期化済みで、基準コミットは`7b00057 chore: establish space rag lab baseline`である。PDF取り込み基盤は`feature/lab1-pdf-ingestion`ブランチで実装した。次の作業では、既存のPDFサービス関数をUIから再利用し、同じ処理を重複実装しないこと。
 
 ## 16. 参照したCodex運用方針
 

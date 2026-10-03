@@ -15,12 +15,25 @@ rag-lab ingest --chunk-size 650
 head -n 2 data/processed/chunks.jsonl
 ```
 
+自分の文字レイヤー付きPDFを使う場合:
+
+```bash
+python -m pip install -e '.[pdf]'
+rag-lab ingest-pdf INPUT.pdf \
+  --document-id my_report \
+  --title "自分の技術報告書" \
+  --output .rag_lab/my-report-chunks.jsonl
+```
+
+PDFは25 MB、200ページまでです。暗号化PDFとスキャンPDFのOCRには未対応です。`status`が`needs_review`または`OCR_REQUIRED`なら、警告対象ページと元PDFを比較してください。
+
 ### 作業
 
 1. `data/raw/` のfront matter、ページマーカー、見出しを確認する。
 2. `src/rag_lab/ingest.py` で、どの情報が `Chunk` に残るか追う。
 3. `--chunk-size 300` と `900` を試し、チャンク数と文章のまとまりを比較する。
 4. 自分で5ページ目相当の架空レポートを1つ追加する。
+5. PDFを使う場合は、ページ別文字数、空ページ警告、生成チャンクの`page`を比較する。
 
 ### 成果物と合格条件
 

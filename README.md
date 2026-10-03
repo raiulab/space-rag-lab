@@ -66,11 +66,26 @@ rag-lab summarize europa_comm_2026
 
 ローカル学習ナビゲーションアプリの初期設計、PDF対応範囲、保存形式、テスト、受け入れ条件は [docs/LOCAL_LEARNING_APP_DESIGN.md](docs/LOCAL_LEARNING_APP_DESIGN.md) にまとめています。
 
-## 設計済みのローカル学習アプリ
+## Lab 1のPDF取り込み
 
-次の開発段階では、既存CLIを維持したまま、Lab 1を案内するStreamlitアプリを追加します。正式な予定コマンドは`rag-lab ui`、PDF取り込みCLIは`rag-lab ingest-pdf`です。これらは設計済みですが、まだ実装されていません。
+文字レイヤー付きPDFをページ単位で抽出し、既存の`Chunk`形式へ変換できます。PDF機能だけを追加でインストールしてください。
 
-初期対応は、付属Markdown/TXTと、暗号化されていない文字レイヤー付きPDF 1件です。PDF上限は25 MB、200ページとし、スキャンPDFのOCR、JPEG/PNG、表・図、一般画像解析は後続段階とします。個人の進捗と実データはGit対象外の`.rag_lab/`へ保存し、生PDFは明示選択時だけ保存します。
+```bash
+python -m pip install -e '.[pdf]'
+rag-lab ingest-pdf INPUT.pdf \
+  --document-id example \
+  --title "表示名" \
+  --classification user_provided \
+  --output .rag_lab/example-chunks.jsonl
+```
+
+出力には`document_id`、1始まりの`page`、`section`、`source`が残ります。空ページと20文字未満のページを警告し、空ページ率が20%以上なら`needs_review`になります。文書全体から文字を抽出できないPDFは`OCR_REQUIRED`として終了コード2を返し、チャンクを書き出しません。
+
+対応上限は1件25 MB、200ページで、暗号化されていない文字レイヤー付きPDFが対象です。スキャンPDFのOCR、表・図、一般画像解析はまだ対象外です。元PDFを正解と考えず、ページ表示と抽出テキストを目視比較してください。
+
+次の開発段階では、既存CLIを維持したまま、Lab 1を案内するStreamlitアプリと正式コマンド`rag-lab ui`を追加します。UI、進捗保存、PDFページとの並列比較は設計済みですが、まだ実装されていません。
+
+初期対応は、付属Markdown/TXTと、暗号化されていない文字レイヤー付きPDF 1件です。個人の進捗と実データはGit対象外の`.rag_lab/`へ保存し、生PDFは将来のUIで明示選択時だけ保存します。
 
 UI/PDF機能はPython 3.10〜3.12、Windows、macOS、Linuxを対象にし、APIキーやAWS設定なしで動作させます。詳細は設計書を参照してください。
 
@@ -118,6 +133,8 @@ AWS配置は [infra/README.md](infra/README.md) を参照してください。
 ```bash
 python -m unittest discover -s tests -v
 ```
+
+PDF extraが未導入の場合、PDF抽出を必要とするテストだけがskipされます。PDF機能を含む全テストは`python -m pip install -e '.[pdf]'`の後に同じコマンドで実行できます。
 
 任意で開発用ツールを入れる場合:
 

@@ -19,6 +19,7 @@
 - ローカル学習ナビゲーションの方式は決定済みです。Streamlit、Lab 1、付属Markdown/TXTとテキストPDFを初期範囲とします。
 - Python 3.10〜3.12を対象とし、Python基礎と仮想環境を扱える大学生・社会人を基本対象にします。
 - Python未経験者向けPre-Lab、OCR、一般画像、LangGraphは初期範囲外です。
+- Lab 1のPDF取り込み基盤と`rag-lab ingest-pdf`は実装済みです。Streamlit UI、dataset保存、進捗・完了判定は未実装です。
 
 最初に、次のファイルを読んでください。
 
