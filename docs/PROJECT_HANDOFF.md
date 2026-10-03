@@ -228,8 +228,8 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/source_documents.py`: 形式共通の文書・ページ・ブロック型とチャンク変換
 - `src/rag_lab/pdf_ingest.py`: `pypdf`によるPDF検証、ページ抽出、品質警告
 - `src/rag_lab/pdf_acceptance.py`: 公開PDFの代表ページ確認、受け入れ判定、本文を含まないMarkdown記録
-- `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件、Lab 2検索比較と実験記録のサービス層
-- `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1画面、Lab 2検索比較画面
+- `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件、Lab 2検索比較、Lab 3 RAG実験記録のサービス層
+- `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1〜3の学習画面
 - `src/rag_lab/cli.py`: ui、ingest、ingest-pdf、accept-pdf、index、search、ask、summarize、evaluate、all
 
 ### 6.3 APIとAWS
@@ -249,7 +249,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で54件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
+標準ライブラリの`unittest`で59件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -285,6 +285,8 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 
 同日、Lab 2の学習画面を追加した。付属データとLab 1保存datasetを選択でき、HashEmbeddingの次元、top-k、質問を固定してdense・BM25・hybridの順位を比較する。付属データでは回答可能な8問からHit@kを計算し、保存datasetではゴールド未設定であることを明示して目視評価する。run記録は`.rag_lab/runs/lab2/`へ本文なしで保存し、Lab 2進捗を更新する。
 
+続けてLab 3の学習画面を追加した。同じdataset選択を再利用し、質問、検索方式、top-k、Embedding次元、回答可能性の予想を入力して、検索結果、抽出式回答、引用を段階表示する。回答時の引用追跡と回答不能時に引用を付けない規則を検査し、予想と実際が異なる例は`needs_review`にする。既知の回答不能誤判定を自動修正せず、観察教材として維持する。run記録は`.rag_lab/runs/lab3/`へ回答本文・チャンク本文なしで保存する。
+
 ## 8. 意図的に残している問題
 
 初期実装は完成版ではない。次の問題はLab 6と7の教材として残している。
@@ -297,7 +299,7 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 - プロンプト比較はBedrock等のLLMを接続しなければ十分に評価できない。
 - FastAPIの検索・要約エンドポイントは未実装である。
 - AWS SAMテンプレートは作成済みだが、SAM CLIによる実デプロイ検証はしていない。
-- Lab 3以降の操作画面、詳細な問題診断、評価比較、公開レポート作成は未実装である。
+- Lab 4以降の操作画面、詳細な問題診断、評価比較、公開レポート作成は未実装である。
 - PDF取り込みは文字レイヤーだけに対応し、OCR、表構造、図、一般画像解析は未実装である。
 
 これらを、説明なしに「不具合だから全部直す」のではなく、どれを教材として維持し、どれを学習アプリ側で案内するか区別すること。
@@ -446,7 +448,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みで、基準コミットは`7b00057 chore: establish space rag lab baseline`である。PDF取り込み基盤は`feature/lab1-pdf-ingestion`ブランチで実装した。Lab 1の縦切りは実データ受け入れまで完了したため、次はMilestone 3の問題診断と比較、またはLab 2の検索学習画面へ進む。
+Gitは初期化済みで、基準コミットは`7b00057 chore: establish space rag lab baseline`である。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装した。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。次は公開準備、またはMilestone 3の問題診断と比較へ進む。
 
 ## 16. 参照したCodex運用方針
 

@@ -22,7 +22,7 @@ RAW_DIR = Path("data/raw")
 GOLD_PATH = Path("data/evaluation/gold.jsonl")
 
 
-def _dataset_options(workspace: Path) -> dict[str, str]:
+def dataset_options(workspace: Path) -> dict[str, str]:
     options = {"付属の宇宙技術レポート（評価質問あり）": "bundled"}
     for item in list_saved_datasets(workspace):
         label = f"{item.label} / {item.chunk_count} chunks / {item.dataset_id}"
@@ -30,7 +30,7 @@ def _dataset_options(workspace: Path) -> dict[str, str]:
     return options
 
 
-def _load_dataset(workspace: Path, dataset_id: str):
+def load_dataset(workspace: Path, dataset_id: str):
     if dataset_id == "bundled":
         return bundled_dataset(RAW_DIR)
     return load_saved_dataset(workspace, dataset_id)
@@ -53,13 +53,15 @@ def _render_results(experiment: Lab2Experiment) -> None:
             column.metric(f"{mode} Hit@{experiment.top_k}", experiment.hit_rates[mode])
     else:
         st.info(
-            "この実データには正解文書IDがないため、自動Hit率は計算しません。"
+            "この実データには正解文書IDがないため、"
+            "自動Hit率は計算しません。"
             "元資料と検索結果を目視で評価してください。"
         )
 
     st.info(
         "dense・BM25・hybridはスコアの尺度が異なるため、"
-        "方式をまたいでスコア値そのものを大小比較しません。順位と本文を比べます。"
+        "方式をまたいでスコア値そのものを大小比較しません。"
+        "順位と本文を比べます。"
     )
     tabs = st.tabs(["dense", "BM25", "hybrid"])
     for tab, mode in zip(tabs, ("dense", "bm25", "hybrid")):
@@ -119,7 +121,7 @@ def render_lab2(workspace: Path) -> None:
         "**学習目標:** dense、BM25、hybridの違いを、"
         "同じデータ・質問・top-kで比較して説明する。"
     )
-    options = _dataset_options(workspace)
+    options = dataset_options(workspace)
     selected = st.selectbox(
         "Lab 2で使うデータセット",
         options=list(options),
@@ -149,7 +151,7 @@ def render_lab2(workspace: Path) -> None:
         key="run_lab2",
     ):
         try:
-            dataset = _load_dataset(workspace, options[selected])
+            dataset = load_dataset(workspace, options[selected])
             st.session_state["lab2_experiment"] = run_lab2_experiment(
                 dataset,
                 query=query,

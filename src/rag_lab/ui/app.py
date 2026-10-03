@@ -19,6 +19,7 @@ from rag_lab.learning.progress import ProgressStore, ProgressStoreError
 from rag_lab.learning.storage import DatasetStorageError
 from rag_lab.pdf_ingest import PdfIngestError
 from rag_lab.ui.lab2 import render_lab2
+from rag_lab.ui.lab3 import render_lab3
 
 
 WORKSPACE = Path(".rag_lab")
@@ -46,7 +47,7 @@ def render_lab_catalog() -> None:
     st.subheader("8つのLab")
     for number, name in enumerate(LAB_NAMES, start=1):
         lab_id = f"lab{number}"
-        if number <= 2:
+        if number <= 3:
             status = _progress_status(lab_id)
             st.markdown(
                 f"**Lab {number} — {name}**　`{status}`　オフライン対応"
@@ -346,13 +347,16 @@ def main() -> None:
         options=(
             "Lab 1: 文書の収集と加工",
             "Lab 2: Embeddingと検索比較",
+            "Lab 3: RAGパイプライン",
         ),
         key="selected_lab",
     )
     if selected_lab.startswith("Lab 1"):
         render_lab1()
-    else:
+    elif selected_lab.startswith("Lab 2"):
         render_lab2(WORKSPACE)
+    else:
+        render_lab3(WORKSPACE)
 
 
 main()

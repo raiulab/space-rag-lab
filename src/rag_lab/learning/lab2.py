@@ -28,7 +28,7 @@ class Lab2Experiment:
     benchmark_questions: int
 
 
-def _retriever(chunks: Sequence[Chunk], dimension: int) -> Retriever:
+def build_retriever(chunks: Sequence[Chunk], dimension: int) -> Retriever:
     model = HashEmbeddingModel(dimension)
     rows = [(chunk, model.embed(chunk.text)) for chunk in chunks]
     return Retriever(rows, model)
@@ -74,7 +74,7 @@ def run_lab2_experiment(
         raise ValueError("検索質問を入力してください")
     if not 1 <= top_k <= 20:
         raise ValueError("top_kは1から20で指定してください")
-    retriever = _retriever(dataset.chunks, dimension)
+    retriever = build_retriever(dataset.chunks, dimension)
     results = {
         mode: tuple(retriever.search(cleaned_query, top_k=top_k, mode=mode))
         for mode in SEARCH_MODES

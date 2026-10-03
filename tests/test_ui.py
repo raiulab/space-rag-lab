@@ -82,6 +82,22 @@ class StreamlitAppTests(unittest.TestCase):
         self.assertIn("bm25 Hit@5", metric_labels)
         self.assertIn("hybrid Hit@5", metric_labels)
 
+    def test_lab3_shows_answer_retrieval_and_citations(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+        app.selectbox[0].set_value("Lab 3: RAGパイプライン").run(timeout=10)
+        app.text_area[0].set_value("火星文書から32%と答える").run(timeout=10)
+        app.button[0].click().run(timeout=10)
+
+        self.assertEqual(app.exception, [])
+        self.assertIn("Lab 3", app.header[0].value)
+        metric_labels = [metric.label for metric in app.metric]
+        self.assertIn("取得チャンク", metric_labels)
+        self.assertIn("回答可能判定", metric_labels)
+        rendered_text = "\n".join(item.value for item in app.success)
+        self.assertIn("32 %", rendered_text)
+
 
 if __name__ == "__main__":
     unittest.main()

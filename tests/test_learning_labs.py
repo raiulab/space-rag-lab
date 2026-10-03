@@ -19,6 +19,11 @@ from rag_lab.learning.lab2 import (
     run_lab2_experiment,
     save_lab2_experiment,
 )
+from rag_lab.learning.lab3 import (
+    evaluate_lab3,
+    run_lab3_experiment,
+    save_lab3_experiment,
+)
 
 
 ROOT = Path(__file__).parents[1]
@@ -120,6 +125,95 @@ class Lab2LearningTests(unittest.TestCase):
         self.assertNotIn(self.dataset.chunks[0].text, saved_text)
         self.assertNotIn("do-not-persist", saved_text)
         self.assertEqual(progress["labs"]["lab2"]["status"], "completed")
+
+
+class Lab3LearningTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.dataset = bundled_dataset(RAW_DIR)
+        self.prompt = ROOT / "prompts" / "answer_v2_grounded.txt"
+
+    def test_answer_can_be_traced_to_retrieved_chunks(self) -> None:
+        experiment = run_lab3_experiment(
+            self.dataset,
+            question="火星の砂嵐で太陽電池出力は何%まで低下しましたか？",
+            expected_answerable=True,
+            prompt_path=self.prompt,
+        )
+        completion = evaluate_lab3(
+            experiment,
+            prediction="火星文書が検索され32%と答える",
+            observation="回答と引用から火星文書へ戻れた",
+        )
+
+        self.assertTrue(experiment.answer.answerable)
+        self.assertIn("32 %", experiment.answer.text)
+        self.assertEqual(experiment.answer.citations[0].document_id, "mars_power_2026")
+        self.assertEqual(completion.status, "completed")
+
+    def test_supported_refusal_has_no_citations(self) -> None:
+        experiment = run_lab3_experiment(
+            self.dataset,
+            question="penguin feather count",
+            expected_answerable=False,
+            prompt_path=self.prompt,
+        )
+        completion = evaluate_lab3(
+            experiment,
+            prediction="回答不能になる",
+            observation="共通語がなく拒否した",
+        )
+
+        self.assertFalse(experiment.answer.answerable)
+        self.assertEqual(experiment.answer.citations, [])
+        self.assertEqual(completion.status, "completed")
+
+    def test_wrong_answerability_prediction_needs_review(self) -> None:
+        experiment = run_lab3_experiment(
+            self.dataset,
+            question="月面基地で生活する乗員は何人ですか？",
+            expected_answerable=False,
+            prompt_path=self.prompt,
+        )
+        completion = evaluate_lab3(
+            experiment,
+            prediction="文書にないため回答不能になる",
+            observation="対象外という文を回答として選んでしまった",
+        )
+
+        self.assertTrue(experiment.answer.answerable)
+        self.assertEqual(completion.status, "needs_review")
+        failed = {check.code for check in completion.checks if not check.passed}
+        self.assertEqual(failed, {"answerability_matches_prediction"})
+
+    def test_saved_run_omits_answer_and_source_body(self) -> None:
+        experiment = run_lab3_experiment(
+            self.dataset,
+            question="火星の太陽電池出力は？",
+            expected_answerable=True,
+            prompt_path=self.prompt,
+            search_mode="hybrid",
+            top_k=3,
+            dimension=64,
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / ".rag_lab"
+            saved = save_lab3_experiment(
+                workspace,
+                experiment,
+                prediction="火星文書から回答する",
+                observation="引用を確認した",
+            )
+            saved_text = saved.path.read_text(encoding="utf-8")
+            value = json.loads(saved_text)
+            progress = json.loads(
+                (workspace / "progress.json").read_text(encoding="utf-8")
+            )
+
+        self.assertNotIn(experiment.answer.text, saved_text)
+        self.assertNotIn(self.dataset.chunks[0].text, saved_text)
+        self.assertTrue(value["summary"]["predicted_answerable"])
+        self.assertEqual(value["settings"]["prompt_version"], "answer_v2_grounded.txt")
+        self.assertEqual(progress["labs"]["lab3"]["status"], "completed")
 
 
 if __name__ == "__main__":
