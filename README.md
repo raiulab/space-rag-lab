@@ -98,6 +98,28 @@ rag-lab ingest-pdf INPUT.pdf \
 
 PDF結果を`.rag_lab/datasets/<dataset_id>/`へ保存するサービス層も実装済みです。manifest、ページ、チャンク、実行記録、完了検査をdataset単位で保持し、既存datasetを上書きしません。PDF原本は明示指定時だけ`raw/source.pdf`へ保存します。
 
+### 公開PDFの受け入れ記録
+
+公開条件を確認した実在PDFを手動検査するときは、PDFをリポジトリ外へ用意し、先頭・中央・末尾ページを元PDFと抽出結果で比較してから記録します。このコマンドはネットワークへ接続せず、PDF本体や抽出本文をレポートへコピーしません。
+
+```bash
+rag-lab accept-pdf /path/to/public-report.pdf \
+  --document-id public_report \
+  --title "公開技術報告書" \
+  --source-url "https://example.org/report.pdf" \
+  --catalog-url "https://example.org/report" \
+  --distribution "Public" \
+  --license-terms "利用条件を確認して記入" \
+  --inspected-page 1 \
+  --inspected-page 5 \
+  --inspected-page 10 \
+  --decision accepted_with_limitations \
+  --observation "代表ページを比較した結果と制約" \
+  --report reports/lab1-public-pdf-acceptance.md
+```
+
+実施済みのNASA技術報告書による確認結果は[`reports/lab1_public_pdf_acceptance_2026-10-03.md`](reports/lab1_public_pdf_acceptance_2026-10-03.md)にあります。第三者PDF本体はGitへ保存していません。
+
 初期対応は、付属Markdown/TXTと、暗号化されていない文字レイヤー付きPDF 1件です。個人の進捗と実データはGit対象外の`.rag_lab/`へ保存し、生PDFはUIから明示選択された場合だけ保存する設計です。
 
 UI/PDF機能はPython 3.10〜3.12、Windows、macOS、Linuxを対象にし、APIキーやAWS設定なしで動作させます。詳細は設計書を参照してください。

@@ -10,6 +10,11 @@ from .evaluation import evaluate_pipeline, write_report
 from .generation import make_generator
 from .ingest import collect_chunks, load_chunks, write_chunks
 from .models import SearchResult
+from .pdf_acceptance import (
+    PdfAcceptanceError,
+    inspect_public_pdf,
+    write_acceptance_report,
+)
 from .pdf_ingest import PdfIngestError, extract_pdf
 from .pipeline import RAGPipeline
 from .retrieval import Retriever
@@ -78,6 +83,36 @@ def command_ingest_pdf(args: argparse.Namespace) -> None:
     write_chunks(chunks, args.output)
     summary["output"] = str(args.output)
     _print_json(summary)
+
+
+def command_accept_pdf(args: argparse.Namespace) -> None:
+    try:
+        report = inspect_public_pdf(
+            args.input,
+            document_id=args.document_id,
+            title=args.title,
+            source_url=args.source_url,
+            catalog_url=args.catalog_url,
+            distribution=args.distribution,
+            license_terms=args.license_terms,
+            inspected_pages=args.inspected_page,
+            decision=args.decision,
+            observation=args.observation,
+            chunk_size=args.chunk_size,
+        )
+        write_acceptance_report(report, args.report)
+    except (PdfIngestError, PdfAcceptanceError) as error:
+        raise SystemExit(str(error)) from error
+
+    _print_json(
+        {
+            "status": report.status,
+            "pages": len(report.extraction.document.pages),
+            "chunks": report.chunks,
+            "inspected_pages": list(report.inspected_pages),
+            "report": str(args.report),
+        }
+    )
 
 
 def command_ui(args: argparse.Namespace) -> None:
@@ -208,6 +243,37 @@ def build_parser() -> argparse.ArgumentParser:
     ingest_pdf.add_argument("--note", default="")
     ingest_pdf.add_argument("--chunk-size", type=int, default=650)
     ingest_pdf.set_defaults(func=command_ingest_pdf)
+
+    accept_pdf = subparsers.add_parser(
+        "accept-pdf",
+        help="公開PDFの手動受け入れ記録を作成",
+    )
+    accept_pdf.add_argument("input", type=Path)
+    accept_pdf.add_argument("--document-id", required=True)
+    accept_pdf.add_argument("--title", required=True)
+    accept_pdf.add_argument("--source-url", required=True)
+    accept_pdf.add_argument("--catalog-url", required=True)
+    accept_pdf.add_argument("--distribution", required=True)
+    accept_pdf.add_argument("--license-terms", required=True)
+    accept_pdf.add_argument(
+        "--inspected-page",
+        type=int,
+        action="append",
+        required=True,
+        help=(
+            "元PDFと抽出結果を目視比較した"
+            "1始まりのページ番号（複数指定可）"
+        ),
+    )
+    accept_pdf.add_argument(
+        "--decision",
+        choices=["accepted", "accepted_with_limitations", "needs_review"],
+        required=True,
+    )
+    accept_pdf.add_argument("--observation", required=True)
+    accept_pdf.add_argument("--chunk-size", type=int, default=650)
+    accept_pdf.add_argument("--report", type=Path, required=True)
+    accept_pdf.set_defaults(func=command_accept_pdf)
 
     ui = subparsers.add_parser("ui", help="ローカル学習ナビゲーションを起動")
     ui.set_defaults(func=command_ui)

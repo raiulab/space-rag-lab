@@ -227,9 +227,10 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/evaluation.py`: 検索、引用、キーワード、回答可能性の評価
 - `src/rag_lab/source_documents.py`: 形式共通の文書・ページ・ブロック型とチャンク変換
 - `src/rag_lab/pdf_ingest.py`: `pypdf`によるPDF検証、ページ抽出、品質警告
+- `src/rag_lab/pdf_acceptance.py`: 公開PDFの代表ページ確認、受け入れ判定、本文を含まないMarkdown記録
 - `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件のサービス層
 - `src/rag_lab/ui/`: Lab一覧、環境確認、付属データ・PDFのLab 1画面
-- `src/rag_lab/cli.py`: ui、ingest、ingest-pdf、index、search、ask、summarize、evaluate、all
+- `src/rag_lab/cli.py`: ui、ingest、ingest-pdf、accept-pdf、index、search、ask、summarize、evaluate、all
 
 ### 6.3 APIとAWS
 
@@ -248,7 +249,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で40件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
+標準ライブラリの`unittest`で48件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -280,6 +281,8 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 
 同日、Streamlit 1.65.0と`streamlit-pdf` 2.1.0で`rag-lab ui`を実装した。AppTestで初期画面と付属データ経路を確認し、実サーバーが`http://127.0.0.1:8501`で起動してヘルスチェックへ応答することを確認した。利用統計送信は無効である。
 
+公開実データ受け入れ試験では、NTRSで`Public`かつ`Work of the US Gov. Public Use Permitted.`と明記されたNASA Technical Memorandum 105232を使用した。PDF本体は一時領域だけで扱い、17ページから58チャンクを生成した。空ページと抽出警告は0件で、全チャンクの出典を保持した。1、9、17ページを画像と抽出テキストで比較し、帳票表のセル境界と読み順が完全には保持されない既知制約を記録したうえで`passed_with_limitations`と判定した。結果は`reports/lab1_public_pdf_acceptance_2026-10-03.md`にある。
+
 ## 8. 意図的に残している問題
 
 初期実装は完成版ではない。次の問題はLab 6と7の教材として残している。
@@ -293,7 +296,6 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 - FastAPIの検索・要約エンドポイントは未実装である。
 - AWS SAMテンプレートは作成済みだが、SAM CLIによる実デプロイ検証はしていない。
 - Lab 2以降の操作画面、詳細な問題診断、評価比較、公開レポート作成は未実装である。
-- 公開条件が明確な実在PDF 1件による手動受け入れ試験は未実施である。
 - PDF取り込みは文字レイヤーだけに対応し、OCR、表構造、図、一般画像解析は未実装である。
 
 これらを、説明なしに「不具合だから全部直す」のではなく、どれを教材として維持し、どれを学習アプリ側で案内するか区別すること。
@@ -359,7 +361,7 @@ Labごとの詳細な作業と合格条件は`docs/LABS.md`を参照する。
 
 最初の縦切りはLab 1だけに限定する。付属Markdown/TXTとテキストPDFの取り込み、抽出比較、チャンク検査、完了判定、ローカル進捗保存を完成させてからLab 2へ進み、その後8 Labへ広げる。
 
-状態: 2026-10-03にLab 1の最小版を実装した。共通文書型、PDFアダプター、`rag-lab ingest-pdf`、合成fixture、異常系テスト、dataset保存、進捗、完了判定、付属データとPDFのStreamlit画面、`rag-lab ui`が動作する。公開実データ1件の受け入れ試験を除き、最初の縦切りは完了している。
+状態: 2026-10-03にLab 1の最小版を完了した。共通文書型、PDFアダプター、`rag-lab ingest-pdf`、合成fixture、異常系テスト、dataset保存、進捗、完了判定、付属データとPDFのStreamlit画面、`rag-lab ui`が動作する。NASA公開技術PDFによる実データ受け入れ試験も完了し、制約付き合格として記録した。
 
 ### Milestone 3: 問題診断と比較
 
@@ -442,7 +444,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みで、基準コミットは`7b00057 chore: establish space rag lab baseline`である。PDF取り込み基盤は`feature/lab1-pdf-ingestion`ブランチで実装した。次の作業では、既存のPDFサービス関数をUIから再利用し、同じ処理を重複実装しないこと。
+Gitは初期化済みで、基準コミットは`7b00057 chore: establish space rag lab baseline`である。PDF取り込み基盤は`feature/lab1-pdf-ingestion`ブランチで実装した。Lab 1の縦切りは実データ受け入れまで完了したため、次はMilestone 3の問題診断と比較、またはLab 2の検索学習画面へ進む。
 
 ## 16. 参照したCodex運用方針
 

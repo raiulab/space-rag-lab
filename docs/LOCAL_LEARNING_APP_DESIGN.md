@@ -562,6 +562,8 @@ Streamlitの`AppTest`で次を確認する。
 - 抽出失敗、段組み崩れ、空ページを成功結果から除外せず記録する。
 - 結果は本文を大量に含めないレポートとして`reports/`へ保存する。
 
+実施結果（2026-10-03）: NASA Technical Memorandum 105232を使用して完了した。NTRSで配布区分`Public`、権利表示`Work of the US Gov. Public Use Permitted.`を確認し、第三者PDF本体は一時領域だけで扱った。17ページ、58チャンク、空ページ0、抽出警告0で、先頭・中央・末尾の1、9、17ページを目視比較した。末尾の帳票表はセル境界と読み順を完全には保持しないため、初期版の表構造非対応を明記して`passed_with_limitations`とした。記録は`reports/lab1_public_pdf_acceptance_2026-10-03.md`に保存した。
+
 ## 12. 受け入れ条件
 
 初期プロトタイプは、次を満たしたとき完成とする。
@@ -631,7 +633,7 @@ Lab 1の体験と保存形式を検証した後に、索引、検索比較、RAG
 12. READMEと引き継ぎ書を更新する。
 13. 全テストと`rag-lab all`を再実行する。
 
-実装状況（2026-10-03）: 1〜10、12、13は完了した。dataset保存、進捗、完了判定は`rag_lab.learning`、画面は`rag_lab.ui`に実装済みである。Streamlit 1.65.0、`streamlit-pdf` 2.1.0、Python 3.10.6でAppTestとローカル起動を確認した。11の公開実データ受け入れ試験は未実施である。
+実装状況（2026-10-03）: 1〜13は完了した。dataset保存、進捗、完了判定は`rag_lab.learning`、画面は`rag_lab.ui`に実装済みである。Streamlit 1.65.0、`streamlit-pdf` 2.1.0、Python 3.10.6でAppTestとローカル起動を確認した。公開実データはNASA Technical Memorandum 105232で確認し、制約を含む短いレポートを`reports/`へ保存した。
 
 ## 15. Git管理方針
 
