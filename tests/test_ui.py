@@ -67,6 +67,21 @@ class StreamlitAppTests(unittest.TestCase):
             [metric.value for metric in app.metric[-3:]], ["4", "12", "20"]
         )
 
+    def test_lab2_compares_three_retrieval_modes(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+        app.selectbox[0].set_value("Lab 2: Embeddingと検索比較").run(timeout=10)
+        app.text_area[0].set_value("BM25が1位になると予想").run(timeout=10)
+        app.button[0].click().run(timeout=10)
+
+        self.assertEqual(app.exception, [])
+        self.assertIn("Lab 2", app.header[0].value)
+        metric_labels = [metric.label for metric in app.metric]
+        self.assertIn("dense Hit@5", metric_labels)
+        self.assertIn("bm25 Hit@5", metric_labels)
+        self.assertIn("hybrid Hit@5", metric_labels)
+
 
 if __name__ == "__main__":
     unittest.main()

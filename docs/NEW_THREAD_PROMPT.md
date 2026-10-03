@@ -21,6 +21,7 @@
 - Python未経験者向けPre-Lab、OCR、一般画像、LangGraphは初期範囲外です。
 - Lab 1のPDF取り込み、`rag-lab ingest-pdf`、dataset保存、進捗・完了判定、Streamlit UI、PDF比較画面は実装済みです。
 - NASA公開技術PDFによる実データ受け入れ試験も完了し、`reports/lab1_public_pdf_acceptance_2026-10-03.md`に制約付き合格として記録済みです。第三者PDF本体はリポジトリへ保存していません。
+- Lab 2の検索比較画面も実装済みです。付属データとLab 1保存datasetでdense・BM25・hybridを比較し、設定と観察を本文なしで保存できます。
 
 最初に、次のファイルを読んでください。
 

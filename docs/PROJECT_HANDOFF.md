@@ -228,8 +228,8 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/source_documents.py`: 形式共通の文書・ページ・ブロック型とチャンク変換
 - `src/rag_lab/pdf_ingest.py`: `pypdf`によるPDF検証、ページ抽出、品質警告
 - `src/rag_lab/pdf_acceptance.py`: 公開PDFの代表ページ確認、受け入れ判定、本文を含まないMarkdown記録
-- `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件のサービス層
-- `src/rag_lab/ui/`: Lab一覧、環境確認、付属データ・PDFのLab 1画面
+- `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件、Lab 2検索比較と実験記録のサービス層
+- `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1画面、Lab 2検索比較画面
 - `src/rag_lab/cli.py`: ui、ingest、ingest-pdf、accept-pdf、index、search、ask、summarize、evaluate、all
 
 ### 6.3 APIとAWS
@@ -249,7 +249,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で48件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
+標準ライブラリの`unittest`で54件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -283,6 +283,8 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 
 公開実データ受け入れ試験では、NTRSで`Public`かつ`Work of the US Gov. Public Use Permitted.`と明記されたNASA Technical Memorandum 105232を使用した。PDF本体は一時領域だけで扱い、17ページから58チャンクを生成した。空ページと抽出警告は0件で、全チャンクの出典を保持した。1、9、17ページを画像と抽出テキストで比較し、帳票表のセル境界と読み順が完全には保持されない既知制約を記録したうえで`passed_with_limitations`と判定した。結果は`reports/lab1_public_pdf_acceptance_2026-10-03.md`にある。
 
+同日、Lab 2の学習画面を追加した。付属データとLab 1保存datasetを選択でき、HashEmbeddingの次元、top-k、質問を固定してdense・BM25・hybridの順位を比較する。付属データでは回答可能な8問からHit@kを計算し、保存datasetではゴールド未設定であることを明示して目視評価する。run記録は`.rag_lab/runs/lab2/`へ本文なしで保存し、Lab 2進捗を更新する。
+
 ## 8. 意図的に残している問題
 
 初期実装は完成版ではない。次の問題はLab 6と7の教材として残している。
@@ -295,7 +297,7 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 - プロンプト比較はBedrock等のLLMを接続しなければ十分に評価できない。
 - FastAPIの検索・要約エンドポイントは未実装である。
 - AWS SAMテンプレートは作成済みだが、SAM CLIによる実デプロイ検証はしていない。
-- Lab 2以降の操作画面、詳細な問題診断、評価比較、公開レポート作成は未実装である。
+- Lab 3以降の操作画面、詳細な問題診断、評価比較、公開レポート作成は未実装である。
 - PDF取り込みは文字レイヤーだけに対応し、OCR、表構造、図、一般画像解析は未実装である。
 
 これらを、説明なしに「不具合だから全部直す」のではなく、どれを教材として維持し、どれを学習アプリ側で案内するか区別すること。

@@ -18,6 +18,7 @@ from rag_lab.learning.lab1 import (
 from rag_lab.learning.progress import ProgressStore, ProgressStoreError
 from rag_lab.learning.storage import DatasetStorageError
 from rag_lab.pdf_ingest import PdfIngestError
+from rag_lab.ui.lab2 import render_lab2
 
 
 WORKSPACE = Path(".rag_lab")
@@ -33,20 +34,23 @@ LAB_NAMES = (
 )
 
 
-def _progress_status() -> str:
+def _progress_status(lab_id: str) -> str:
     try:
         progress = ProgressStore(WORKSPACE).load()
-        return progress.get("labs", {}).get("lab1", {}).get("status", "not_started")
+        return progress.get("labs", {}).get(lab_id, {}).get("status", "not_started")
     except ProgressStoreError:
         return "needs_review"
 
 
 def render_lab_catalog() -> None:
     st.subheader("8つのLab")
-    current_status = _progress_status()
     for number, name in enumerate(LAB_NAMES, start=1):
-        if number == 1:
-            st.markdown(f"**Lab 1 — {name}**　`{current_status}`　オフライン対応")
+        lab_id = f"lab{number}"
+        if number <= 2:
+            status = _progress_status(lab_id)
+            st.markdown(
+                f"**Lab {number} — {name}**　`{status}`　オフライン対応"
+            )
         else:
             st.markdown(f"Lab {number} — {name}　`準備中`")
 
@@ -312,13 +316,7 @@ def render_guidance() -> None:
         )
 
 
-def main() -> None:
-    st.set_page_config(page_title="Space RAG Lab", page_icon="🛰️", layout="wide")
-    st.title("Space RAG Lab")
-    st.caption("ローカル・オフラインで進めるRAG学習ナビゲーション")
-    render_lab_catalog()
-    render_environment()
-    st.divider()
+def render_lab1() -> None:
     st.header("Lab 1: 技術文書・報告書の収集と加工")
     st.markdown(
         "**学習目標:** 文書を検索単位へ分けても、"
@@ -334,6 +332,27 @@ def main() -> None:
     else:
         render_bundled_lab()
     render_guidance()
+
+
+def main() -> None:
+    st.set_page_config(page_title="Space RAG Lab", page_icon="🛰️", layout="wide")
+    st.title("Space RAG Lab")
+    st.caption("ローカル・オフラインで進めるRAG学習ナビゲーション")
+    render_lab_catalog()
+    render_environment()
+    st.divider()
+    selected_lab = st.selectbox(
+        "学習するLab",
+        options=(
+            "Lab 1: 文書の収集と加工",
+            "Lab 2: Embeddingと検索比較",
+        ),
+        key="selected_lab",
+    )
+    if selected_lab.startswith("Lab 1"):
+        render_lab1()
+    else:
+        render_lab2(WORKSPACE)
 
 
 main()

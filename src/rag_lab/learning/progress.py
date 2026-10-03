@@ -6,7 +6,7 @@ import tempfile
 from pathlib import Path
 from typing import Any, Sequence
 
-from .checks import Lab1Completion
+from .checks import Lab1Completion, LabCompletion
 
 
 SCHEMA_VERSION = 1
@@ -44,7 +44,11 @@ class ProgressStore:
         if not self.path.exists():
             return {
                 "schema_version": SCHEMA_VERSION,
-                "labs": {"lab1": {"status": "not_started"}},
+                "labs": {
+                    "lab1": {"status": "not_started"},
+                    "lab2": {"status": "not_started"},
+                    "lab3": {"status": "not_started"},
+                },
             }
         try:
             value = json.loads(self.path.read_text(encoding="utf-8"))
@@ -66,19 +70,42 @@ class ProgressStore:
         observation: str,
         confirmed_warning_ids: Sequence[str],
     ) -> dict[str, Any]:
+        return self.update_lab(
+            "lab1",
+            completion=completion,
+            run_id=run_id,
+            updated_at=updated_at,
+            prediction=prediction,
+            observation=observation,
+            details={"confirmed_warning_ids": list(confirmed_warning_ids)},
+        )
+
+    def update_lab(
+        self,
+        lab_id: str,
+        *,
+        completion: LabCompletion,
+        run_id: str,
+        updated_at: str,
+        prediction: str,
+        observation: str,
+        details: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        if lab_id not in {f"lab{number}" for number in range(1, 9)}:
+            raise ProgressStoreError("学習進捗のLab IDが不正です")
         value = self.load()
         labs = value.setdefault("labs", {})
-        existing = labs.get("lab1", {})
+        existing = labs.get(lab_id, {})
         if not isinstance(existing, dict):
-            raise ProgressStoreError("Lab 1の進捗形式が不正です")
-        labs["lab1"] = {
+            raise ProgressStoreError(f"{lab_id}の進捗形式が不正です")
+        labs[lab_id] = {
             **existing,
             "status": completion.status,
             "last_run_id": run_id,
             "updated_at": updated_at,
             "prediction": prediction,
             "observation": observation,
-            "confirmed_warning_ids": list(confirmed_warning_ids),
+            **(details or {}),
         }
         try:
             write_json_atomic(self.path, value)
