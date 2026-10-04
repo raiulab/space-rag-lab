@@ -1,6 +1,6 @@
 # Space Research RAG Lab プロジェクト引き継ぎ書
 
-最終更新: 2026-10-03
+最終更新: 2026-10-04
 
 この文書は、旧スレッドで行った検討・実装・検証を、新しいCodexプロジェクトの新しいスレッドへ引き継ぐための永続的なコンテキストである。新しいスレッドは会話履歴を知っていると仮定せず、この文書、`AGENTS.md`、`README.md`、`docs/LABS.md`、実際のコードとテストを情報源として扱うこと。
 
@@ -249,7 +249,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で59件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
+標準ライブラリの`unittest`で63件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -388,6 +388,10 @@ Labごとの詳細な作業と合格条件は`docs/LABS.md`を参照する。
 
 GitHub Pagesは必要になった時点で、公開用ガイドまたはランディングページとして追加する。ローカル実習アプリの完成条件には含めない。
 
+状態: 2026-10-04にv0.1.0の公開候補を整備した。MIT License、変更履歴、リリースノート、貢献・セキュリティ・第三者依存の文書、Issue・Pull Requestテンプレート、Python 3.10〜3.12のGitHub Actionsを追加した。READMEではLab 1〜3の完成範囲とLab 4〜8の未実装UIを明示した。GitHubリポジトリの作成、remote追加、タグ作成、push、GitHub Release公開はまだ行っていない。
+
+公開候補のローカル検証では、UI/PDF込み63件、依存を無効化したコア63件（24件skip）、Ruff、`rag-lab all`、代表質問、Python 3.10.6の新規仮想環境からのeditable install、wheel作成、依存整合性検査が成功した。オフライン評価値はretrieval 1.00、citation 0.80、keyword 0.95、answerability 0.80で従来値を維持した。GitHub Actions上のPython 3.10〜3.12検証はremoteへpushした後に確認する。
+
 ## 11. 学習アプリの安全要件
 
 - 任意のシェル文字列を利用者入力から実行しない。
@@ -448,7 +452,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みで、基準コミットは`7b00057 chore: establish space rag lab baseline`である。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装した。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。次は公開準備、またはMilestone 3の問題診断と比較へ進む。
+Gitは初期化済みで、基準コミットは`7b00057 chore: establish space rag lab baseline`である。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装した。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。v0.1.0の公開文書とCIは準備済みだが、Git remote、公開タグ、GitHub Releaseは未作成である。公開後はMilestone 3の問題診断と比較へ進む。
 
 ## 16. 参照したCodex運用方針
 

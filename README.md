@@ -4,6 +4,20 @@
 
 教材の文書・数値・組織はすべて架空です。実在するミッションの判断や設計には使用しないでください。
 
+## v0.1.0の公開範囲
+
+この版では、APIキー不要のCLIと、Lab 1〜3のローカル学習ナビゲーションが動作します。Lab 4〜8にはガイド、CLI、一部のAPI・Bedrock・AWS基盤がありますが、Lab 1〜3と同じブラウザ学習画面はまだありません。
+
+| 項目 | v0.1.0の状態 |
+| --- | --- |
+| Lab 1 文書加工・PDF取り込み | UI・CLI実装済み |
+| Lab 2 検索比較 | UI・CLI実装済み |
+| Lab 3 根拠付きRAG | UI・CLI実装済み |
+| Lab 4〜8 | ガイド・CLI・一部基盤、UI未実装 |
+| APIキーなしの実行 | 対応 |
+| 自分のPDF | 文字レイヤー付きPDFに対応 |
+| OCR・表・図・一般画像解析 | 未対応 |
+
 ## 対象者と前提知識
 
 基本対象者は、Pythonの基本文法、関数、リスト・辞書、ファイル操作の基礎を理解し、ターミナルと仮想環境を手順に沿って扱える大学生・社会人です。割合や平均を読めれば十分で、専門的な統計知識は必要ありません。
@@ -18,7 +32,7 @@ Pythonを一度も書いたことがない人は、現行本編の基本対象�
 
 ```mermaid
 flowchart LR
-    A[Markdown報告書] --> B[整形・分割]
+    A[Markdown / TXT / PDF] --> B[整形・分割]
     B --> C[Embedding索引]
     Q[質問] --> D[BM25 + ベクトル検索]
     C --> D
@@ -46,6 +60,15 @@ rag-lab summarize europa_comm_2026
 `rag-lab all` は、生文書の加工、Embedding索引の作成、10問の評価を順に実行します。詳しい結果は `reports/evaluation.json` に保存されます。
 
 インストールせずに試す場合は、各コマンドの先頭を `PYTHONPATH=src python3 -m rag_lab.cli` に置き換えられます。
+
+ブラウザでLab 1〜3を進める場合は、PDFとUIの任意依存を追加します。
+
+```bash
+python -m pip install -e '.[ui,pdf]'
+rag-lab ui
+```
+
+対応環境はPython 3.10〜3.12、Windows、macOS、Linuxです。Windowsでは仮想環境を`.venv\Scripts\activate`で有効化してください。
 
 ## 8つの実習
 
@@ -195,3 +218,12 @@ ruff check .
 - 抽出式生成 / LLM生成
 
 目標は「一度だけ良い回答を出すこと」ではなく、失敗例を再現し、修正が別の質問を悪化させていないと説明できることです。
+
+## 公開情報
+
+- 変更履歴: [CHANGELOG.md](CHANGELOG.md)
+- v0.1.0リリースノート: [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md)
+- 貢献方法: [CONTRIBUTING.md](CONTRIBUTING.md)
+- セキュリティ方針: [SECURITY.md](SECURITY.md)
+- 第三者パッケージ: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
+- ライセンス: [MIT License](LICENSE)

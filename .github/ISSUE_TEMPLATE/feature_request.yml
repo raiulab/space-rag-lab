@@ -1,0 +1,33 @@
+name: 改善提案
+description: 教材または機能の改善を提案する
+title: "[Idea] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: learning-problem
+    attributes:
+      label: 解決したい学習上の問題
+      description: どの利用者が、どのLabで困るかを記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 提案
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 代替案
+      description: 検討した別の方法があれば記載してください。
+  - type: dropdown
+    id: network
+    attributes:
+      label: APIキーまたはネットワークが必要ですか
+      options:
+        - いいえ
+        - 任意機能として必要
+        - 必須
+    validations:
+      required: true

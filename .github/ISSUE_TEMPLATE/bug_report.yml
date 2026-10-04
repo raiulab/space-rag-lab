@@ -1,0 +1,51 @@
+name: バグ報告
+description: 再現可能な不具合を報告する
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: 秘密情報、個人情報、第三者PDFの本文は投稿しないでください。
+  - type: textarea
+    id: summary
+    attributes:
+      label: 概要
+      description: 何が起きたかを簡潔に記載してください。
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 再現手順
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期待した結果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 実際の結果
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: 環境
+      description: OS、Pythonバージョン、導入したextraを記載してください。
+      placeholder: macOS 15 / Python 3.12 / ui,pdf
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: 公開内容の確認
+      options:
+        - label: APIキー、AWS認証情報、個人情報、第三者PDF本文を含んでいません。
+          required: true
