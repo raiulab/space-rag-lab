@@ -1,6 +1,6 @@
 # Space Research RAG Lab プロジェクト引き継ぎ書
 
-最終更新: 2026-10-04
+最終更新: 2026-10-06
 
 この文書は、旧スレッドで行った検討・実装・検証を、新しいCodexプロジェクトの新しいスレッドへ引き継ぐための永続的なコンテキストである。新しいスレッドは会話履歴を知っていると仮定せず、この文書、`AGENTS.md`、`README.md`、`docs/LABS.md`、実際のコードとテストを情報源として扱うこと。
 
@@ -452,7 +452,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みで、基準コミットは`7b00057 chore: establish space rag lab baseline`である。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装した。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。v0.1.0の公開文書とCIは準備済みだが、Git remote、公開タグ、GitHub Releaseは未作成である。公開後はMilestone 3の問題診断と比較へ進む。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者・作成者メールをGitHubのnoreply形式へ統一した。v0.1.0の公開文書とCIは準備済みだが、Git remote、公開タグ、GitHub Releaseは未作成である。公開後はMilestone 3の問題診断と比較へ進む。
 
 ## 16. 参照したCodex運用方針
 
