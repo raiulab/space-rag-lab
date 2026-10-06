@@ -37,6 +37,10 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertIsNotNone(module_version)
         self.assertEqual(project_version.group(1), "0.1.0")
         self.assertEqual(module_version.group(1), project_version.group(1))
+        self.assertIn(
+            'Repository = "https://github.com/raiulab/space-rag-lab"',
+            pyproject,
+        )
 
     def test_ci_covers_supported_python_versions_and_offline_evaluation(self) -> None:
         workflow = (PROJECT_ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8")

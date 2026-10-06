@@ -1,5 +1,7 @@
 # Space Research RAG Lab
 
+[![CI](https://github.com/raiulab/space-rag-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/raiulab/space-rag-lab/actions/workflows/ci.yml)
+
 宇宙技術に関する架空の報告書を使い、文書処理からAWS公開までを段階的に学ぶ実習プロジェクトです。Notebookは使わず、Pythonモジュール、CLI、テスト、評価レポートを成果物として残します。
 
 教材の文書・数値・組織はすべて架空です。実在するミッションの判断や設計には使用しないでください。
@@ -48,6 +50,8 @@ flowchart LR
 Python 3.10以上だけで、コア実習を動かせます。
 
 ```bash
+git clone https://github.com/raiulab/space-rag-lab.git
+cd space-rag-lab
 python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -e .

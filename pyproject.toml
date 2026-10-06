@@ -33,6 +33,12 @@ dev = ["pytest>=8,<10", "ruff>=0.16,<0.17"]
 [project.scripts]
 rag-lab = "rag_lab.cli:main"
 
+[project.urls]
+Homepage = "https://github.com/raiulab/space-rag-lab"
+Repository = "https://github.com/raiulab/space-rag-lab"
+Issues = "https://github.com/raiulab/space-rag-lab/issues"
+Changelog = "https://github.com/raiulab/space-rag-lab/blob/main/CHANGELOG.md"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
