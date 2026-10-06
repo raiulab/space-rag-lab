@@ -388,9 +388,9 @@ Labごとの詳細な作業と合格条件は`docs/LABS.md`を参照する。
 
 GitHub Pagesは必要になった時点で、公開用ガイドまたはランディングページとして追加する。ローカル実習アプリの完成条件には含めない。
 
-状態: 2026-10-04にv0.1.0の公開候補を整備した。MIT License、変更履歴、リリースノート、貢献・セキュリティ・第三者依存の文書、Issue・Pull Requestテンプレート、Python 3.10〜3.12のGitHub Actionsを追加した。READMEではLab 1〜3の完成範囲とLab 4〜8の未実装UIを明示した。GitHubリポジトリの作成、remote追加、タグ作成、push、GitHub Release公開はまだ行っていない。
+状態: 2026-10-06にv0.1.0の公開版を整備した。MIT License、変更履歴、リリースノート、貢献・セキュリティ・第三者依存の文書、Issue・Pull Requestテンプレート、Python 3.10〜3.12のGitHub Actionsを追加した。READMEではLab 1〜3の完成範囲とLab 4〜8の未実装UIを明示した。Publicリポジトリ[`raiulab/space-rag-lab`](https://github.com/raiulab/space-rag-lab)を作成し、`main`だけをpushした。v0.1.0タグとGitHub Releaseも同じ監査済みコミットから公開した。
 
-公開候補のローカル検証では、UI/PDF込み63件、依存を無効化したコア63件（24件skip）、Ruff、`rag-lab all`、代表質問、Python 3.10.6の新規仮想環境からのeditable install、wheel作成、依存整合性検査が成功した。オフライン評価値はretrieval 1.00、citation 0.80、keyword 0.95、answerability 0.80で従来値を維持した。GitHub Actions上のPython 3.10〜3.12検証はremoteへpushした後に確認する。
+公開候補のローカル検証では、UI/PDF込み63件、依存を無効化したコア63件（24件skip）、Ruff、`rag-lab all`、代表質問、Python 3.10.6の新規仮想環境からのeditable install、wheel作成、依存整合性検査が成功した。オフライン評価値はretrieval 1.00、citation 0.80、keyword 0.95、answerability 0.80で従来値を維持した。GitHub ActionsでもUbuntu 24.04上のPython 3.10〜3.12コア経路と、Python 3.12のUI/PDF全テストが成功した。
 
 ## 11. 学習アプリの安全要件
 
@@ -452,7 +452,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者・作成者メールをGitHubのnoreply形式へ統一した。v0.1.0の公開文書とCIは準備済みだが、Git remote、公開タグ、GitHub Releaseは未作成である。公開後はMilestone 3の問題診断と比較へ進む。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者・作成者メールをGitHubのnoreply形式へ統一した。v0.1.0をPublicリポジトリとGitHub Releaseで公開済みである。次はMilestone 3の問題診断と比較へ進む。
 
 ## 16. 参照したCodex運用方針
 
