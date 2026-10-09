@@ -112,6 +112,7 @@ class ProgressStoreTests(unittest.TestCase):
 
         self.assertEqual(progress["schema_version"], 1)
         self.assertEqual(progress["labs"]["lab1"]["status"], "not_started")
+        self.assertEqual(progress["labs"]["lab4"]["status"], "not_started")
         self.assertEqual(progress["labs"]["lab5"]["status"], "not_started")
 
     def test_update_preserves_existing_fields(self) -> None:

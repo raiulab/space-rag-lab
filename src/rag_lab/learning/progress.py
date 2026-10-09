@@ -48,6 +48,7 @@ class ProgressStore:
                     "lab1": {"status": "not_started"},
                     "lab2": {"status": "not_started"},
                     "lab3": {"status": "not_started"},
+                    "lab4": {"status": "not_started"},
                     "lab5": {"status": "not_started"},
                 },
             }

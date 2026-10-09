@@ -21,6 +21,7 @@ from rag_lab.pdf_ingest import PdfIngestError
 from rag_lab.ui.lab2 import render_lab2
 from rag_lab.ui.lab3 import render_lab3
 from rag_lab.ui.diagnostics import render_diagnostics
+from rag_lab.ui.lab4 import render_lab4
 from rag_lab.ui.lab5 import render_lab5
 
 
@@ -50,10 +51,15 @@ def render_lab_catalog() -> None:
     st.subheader("8つのLab")
     for number, name in enumerate(LAB_NAMES, start=1):
         lab_id = f"lab{number}"
-        if number in {1, 2, 3, 5}:
+        if number in {1, 2, 3, 4, 5}:
             status = _progress_status(lab_id)
+            availability = (
+                "オフライン模擬対応・Bedrock任意"
+                if number == 4
+                else "オフライン対応"
+            )
             st.markdown(
-                f"**Lab {number} — {name}**　`{status}`　オフライン対応"
+                f"**Lab {number} — {name}**　`{status}`　{availability}"
             )
         else:
             st.markdown(f"Lab {number} — {name}　`準備中`")
@@ -67,7 +73,7 @@ def render_environment() -> None:
     first, second, third = st.columns(3)
     first.metric("Python", f"{sys.version_info.major}.{sys.version_info.minor}")
     second.metric("PDF抽出", "利用可能" if pdf_ok else "追加導入が必要")
-    third.metric("外部API", "不要")
+    third.metric("外部API", "任意（既定は不要）")
     if not python_ok:
         st.warning("この教材の検証済みPythonは3.10〜3.12です。")
     if not pdf_ok:
@@ -342,7 +348,7 @@ def render_lab1() -> None:
 def main() -> None:
     st.set_page_config(page_title="Space RAG Lab", page_icon="🛰️", layout="wide")
     st.title("Space RAG Lab")
-    st.caption("ローカル・オフラインで進めるRAG学習ナビゲーション")
+    st.caption("ローカル中心で進めるRAG学習ナビゲーション")
     render_lab_catalog()
     render_environment()
     st.divider()
@@ -352,6 +358,7 @@ def main() -> None:
             "Lab 1: 文書の収集と加工",
             "Lab 2: Embeddingと検索比較",
             "Lab 3: RAGパイプライン",
+            "Lab 4: 任意LLM API連携",
             "Lab 5: 検索・要約・質問応答",
             "診断・比較: 評価結果と次の実験",
         ),
@@ -363,6 +370,8 @@ def main() -> None:
         render_lab2(WORKSPACE)
     elif selected_lab.startswith("Lab 3"):
         render_lab3(WORKSPACE)
+    elif selected_lab.startswith("Lab 4"):
+        render_lab4(WORKSPACE)
     elif selected_lab.startswith("Lab 5"):
         render_lab5(WORKSPACE)
     else:

@@ -2,13 +2,32 @@ from __future__ import annotations
 
 import os
 from abc import ABC, abstractmethod
-from typing import Sequence
+from typing import Any, Sequence
 
 from .models import SearchResult
 from .text import split_sentences, tokenize
 
 
 DEFAULT_REFUSAL = "提供された文書では確認できません。"
+
+
+def render_grounded_prompt(
+    question: str,
+    results: Sequence[SearchResult],
+    prompt_template: str,
+) -> str:
+    """Render the exact prompt sent to an external generator."""
+
+    context_parts = []
+    for result in results:
+        context_parts.append(
+            f"[chunk_id={result.chunk.chunk_id} title={result.chunk.title} "
+            f"page={result.chunk.page}]\n{result.chunk.text}"
+        )
+    return prompt_template.format(
+        question=question,
+        context="\n\n".join(context_parts),
+    )
 
 
 class Generator(ABC):
@@ -58,17 +77,39 @@ class ExtractiveGenerator(Generator):
 class BedrockGenerator(Generator):
     """Optional Amazon Bedrock Converse API adapter used in Lab 4 and Lab 8."""
 
-    def __init__(self, model_id: str | None = None, region: str | None = None) -> None:
-        try:
-            import boto3
-        except ImportError as exc:  # pragma: no cover - optional integration
-            raise RuntimeError("Install the AWS extra: pip install -e '.[aws]'") from exc
+    def __init__(
+        self,
+        model_id: str | None = None,
+        region: str | None = None,
+        *,
+        client: Any | None = None,
+        read_timeout_seconds: int = 30,
+        max_attempts: int = 2,
+    ) -> None:
         self.model_id = model_id or os.environ.get("BEDROCK_MODEL_ID", "")
         if not self.model_id:
             raise RuntimeError("BEDROCK_MODEL_ID is required for the Bedrock generator")
+        if read_timeout_seconds <= 0 or max_attempts <= 0:
+            raise ValueError("timeout and retry limits must be positive")
+        self.region = region or os.environ.get("AWS_REGION", "ap-northeast-1")
+        self.read_timeout_seconds = read_timeout_seconds
+        self.max_attempts = max_attempts
+        if client is not None:
+            self.client = client
+            return
+        try:
+            import boto3
+            from botocore.config import Config
+        except ImportError as exc:  # pragma: no cover - optional integration
+            raise RuntimeError("Install the AWS extra: pip install -e '.[aws]'") from exc
         self.client = boto3.client(
             "bedrock-runtime",
-            region_name=region or os.environ.get("AWS_REGION", "ap-northeast-1"),
+            region_name=self.region,
+            config=Config(
+                connect_timeout=5,
+                read_timeout=read_timeout_seconds,
+                retries={"max_attempts": max_attempts, "mode": "standard"},
+            ),
         )
 
     def generate(
@@ -77,22 +118,18 @@ class BedrockGenerator(Generator):
         results: Sequence[SearchResult],
         prompt_template: str,
     ) -> tuple[str, bool]:  # pragma: no cover - requires AWS credentials
-        context_parts = []
-        for result in results:
-            context_parts.append(
-                f"[chunk_id={result.chunk.chunk_id} title={result.chunk.title} "
-                f"page={result.chunk.page}]\n{result.chunk.text}"
-            )
-        prompt = prompt_template.format(
-            question=question,
-            context="\n\n".join(context_parts),
-        )
+        prompt = render_grounded_prompt(question, results, prompt_template)
         response = self.client.converse(
             modelId=self.model_id,
             messages=[{"role": "user", "content": [{"text": prompt}]}],
             inferenceConfig={"temperature": 0.0, "maxTokens": 800},
         )
-        text = response["output"]["message"]["content"][0]["text"].strip()
+        try:
+            text = response["output"]["message"]["content"][0]["text"].strip()
+        except (KeyError, IndexError, TypeError, AttributeError) as exc:
+            raise RuntimeError("Bedrock returned an unsupported response format") from exc
+        if not text:
+            raise RuntimeError("Bedrock returned an empty response")
         answerable = DEFAULT_REFUSAL not in text
         return text, answerable
 
