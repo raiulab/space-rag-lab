@@ -20,6 +20,8 @@ UIとPDFを変更するときは任意依存を追加します。
 python -m pip install -e '.[ui,pdf,dev]'
 python -m unittest discover -s tests -v
 ruff check .
+python -m pip install -e '.[api,aws,pdf,ui,dev,security]'
+python -m pip_audit --skip-editable
 ```
 
 Windowsでは仮想環境の有効化に`.venv\Scripts\activate`を使用してください。
@@ -33,6 +35,7 @@ Windowsでは仮想環境の有効化に`.venv\Scripts\activate`を使用して�
 - プロンプト実験は既存版を上書きせず、新しいファイルとして追加します。
 - 実験条件と評価値は`reports/`へ記録します。
 - 学習フロー、UI、アーキテクチャ、スコープの変更前に`docs/PROJECT_HANDOFF.md`を読み、重要な決定を反映します。
+- GitHub Actionsはバージョン名だけで参照せず、検証した完全なcommit SHAへ固定します。
 
 ## データと秘密情報
 

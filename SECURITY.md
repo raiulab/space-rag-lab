@@ -17,3 +17,17 @@
 - `.rag_lab/`には個人の進捗と抽出結果が保存される場合があります。共有前に内容を確認してください。
 - BedrockとAWS機能は任意です。長期認証情報をソース、`.env`、レポートへ保存しないでください。
 - この教材は本番向けマルチユーザーサービスとしての防御や隔離を提供しません。
+
+## Repository controls
+
+- GitHub Secret scanningとpush protectionを有効にします。
+- Python依存関係はDependabotと`pip-audit`で検査します。
+- PythonコードはCodeQLで検査します。
+- GitHub Actionsは完全なcommit SHAへ固定し、既定のworkflow権限を読み取りに限定します。
+- `main`はCIとセキュリティ検査を通した変更だけを取り込み、force pushと削除を禁止します。
+
+## Known security limitations
+
+- FastAPIとAWSサンプルは、認証、認可、レート制限を備えた本番APIではありません。
+- PDFはサイズ、ページ数、シグネチャ、暗号化を検査しますが、解析処理は別プロセスやOS sandboxへ隔離していません。出所を信頼できないPDFを処理しないでください。
+- 依存関係のバージョン範囲は教材の導入しやすさを優先しています。再現性や規制要件がある配布では、別途lockファイルとSBOMを作成してください。

@@ -31,7 +31,7 @@ def get_pipeline() -> RAGPipeline:
     )
 
 
-app = FastAPI(title="Space RAG Lab API", version="0.1.0")
+app = FastAPI(title="Space RAG Lab API", version="0.1.1")
 
 
 @app.get("/health")

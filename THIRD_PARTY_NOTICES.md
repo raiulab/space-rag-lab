@@ -12,5 +12,6 @@ Space RAG Lab本体はMIT Licenseで配布します。任意機能を導入す�
 | `aws` | [Boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html) | Apache-2.0 |
 | `dev` | [pytest](https://docs.pytest.org/) | MIT |
 | `dev` | [Ruff](https://docs.astral.sh/ruff/) | MIT |
+| `security` | [pip-audit](https://github.com/pypa/pip-audit) | Apache-2.0 |
 
 上記パッケージの推移的依存関係にも個別のライセンスが適用されます。再配布時は、実際に固定した依存バージョンのメタデータとライセンスファイルを確認してください。この一覧は法的助言ではありません。
