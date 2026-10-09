@@ -120,6 +120,45 @@ class StreamlitAppTests(unittest.TestCase):
         rendered_text = "\n".join(item.value for item in app.success)
         self.assertIn("6時間", rendered_text)
 
+    def test_lab4_runs_offline_simulated_api_without_credentials(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+        app.selectbox[0].set_value("Lab 4: 任意LLM API連携").run(timeout=10)
+        app.text_area[0].set_value(
+            "模擬APIは成功し抽出式と同じ根拠を使う"
+        ).run(timeout=10)
+        app.button[0].click().run(timeout=10)
+
+        self.assertEqual(app.exception, [])
+        self.assertIn("Lab 4", app.header[0].value)
+        metric_labels = [metric.label for metric in app.metric]
+        self.assertIn("外部呼び出し", metric_labels)
+        self.assertIn("入力文字数", metric_labels)
+        self.assertIn("応答時間", metric_labels)
+        rendered_text = "\n".join(item.value for item in app.success)
+        self.assertIn("32 %", rendered_text)
+
+    def test_lab4_bedrock_requires_cost_and_data_confirmation(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+        app.selectbox[0].set_value("Lab 4: 任意LLM API連携").run(timeout=10)
+        app.radio[1].set_value("Amazon Bedrock（実API）").run(timeout=10)
+        app.text_input[2].set_value("example-model-id").run(timeout=10)
+        app.text_area[0].set_value("実APIは成功すると予想").run(timeout=10)
+
+        self.assertTrue(app.button[0].disabled)
+        app.checkbox[0].set_value(True).run(timeout=10)
+        self.assertTrue(app.button[0].disabled)
+        app.checkbox[1].set_value(True).run(timeout=10)
+        if app.error:
+            self.assertIn(".[aws]", "\n".join(item.value for item in app.error))
+            self.assertTrue(app.button[0].disabled)
+        else:
+            self.assertFalse(app.button[0].disabled)
+        self.assertEqual(app.exception, [])
+
     def test_diagnostics_explains_how_to_create_first_report(self) -> None:
         from streamlit.testing.v1 import AppTest
 

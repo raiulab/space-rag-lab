@@ -24,6 +24,11 @@ from rag_lab.learning.lab3 import (
     run_lab3_experiment,
     save_lab3_experiment,
 )
+from rag_lab.learning.lab4 import (
+    evaluate_lab4,
+    run_lab4_experiment,
+    save_lab4_experiment,
+)
 from rag_lab.learning.lab5 import (
     evaluate_lab5,
     run_lab5_experiment,
@@ -219,6 +224,136 @@ class Lab3LearningTests(unittest.TestCase):
         self.assertTrue(value["summary"]["predicted_answerable"])
         self.assertEqual(value["settings"]["prompt_version"], "answer_v2_grounded.txt")
         self.assertEqual(progress["labs"]["lab3"]["status"], "completed")
+
+
+class Lab4LearningTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.dataset = bundled_dataset(RAW_DIR)
+        self.prompt = ROOT / "prompts" / "answer_v2_grounded.txt"
+        self.question = "火星の砂嵐で太陽電池出力は何%まで低下しましたか？"
+
+    def test_offline_simulator_compares_same_evidence_and_records_metrics(self) -> None:
+        times = iter((10.0, 10.125))
+        experiment = run_lab4_experiment(
+            self.dataset,
+            question=self.question,
+            expected_external_success=True,
+            prompt_path=self.prompt,
+            provider="simulated",
+            simulation_scenario="success",
+            clock=lambda: next(times),
+        )
+        completion = evaluate_lab4(
+            experiment,
+            prediction="模擬APIは成功する",
+            observation="同じ根拠を使い送信文字数と時間を記録した",
+        )
+
+        self.assertEqual(experiment.external_call.status, "success")
+        self.assertEqual(experiment.external_call.latency_ms, 125.0)
+        self.assertGreater(experiment.external_call.input_chars, 0)
+        self.assertIn("32 %", experiment.baseline_answer.text)
+        self.assertIsNotNone(experiment.external_call.answer)
+        self.assertIn("32 %", experiment.external_call.answer.text)
+        self.assertEqual(
+            [item.chunk.chunk_id for item in experiment.baseline_answer.retrieved],
+            [item.chunk.chunk_id for item in experiment.external_call.answer.retrieved],
+        )
+        self.assertEqual(completion.status, "completed")
+
+    def test_simulated_failure_is_safely_classified_and_can_complete(self) -> None:
+        with self.assertLogs("rag_lab.learning.lab4", level="WARNING"):
+            experiment = run_lab4_experiment(
+                self.dataset,
+                question=self.question,
+                expected_external_success=False,
+                prompt_path=self.prompt,
+                provider="simulated",
+                simulation_scenario="throttling",
+            )
+        completion = evaluate_lab4(
+            experiment,
+            prediction="スロットリングとして安全に失敗する",
+            observation="例外全文ではなく失敗分類が表示された",
+        )
+
+        self.assertEqual(experiment.external_call.status, "failed")
+        self.assertEqual(experiment.external_call.failure_type, "throttling")
+        self.assertIsNone(experiment.external_call.answer)
+        self.assertNotIn("simulated external", experiment.external_call.safe_message)
+        self.assertEqual(completion.status, "completed")
+
+    def test_bedrock_failure_and_saved_run_omit_secrets_and_bodies(self) -> None:
+        sensitive_error = "credential-like-detail-must-not-leak"
+        sensitive_model_id = (
+            "arn:aws:bedrock:ap-northeast-1:123456789012:"
+            "inference-profile/private-profile"
+        )
+
+        class FakeClientError(Exception):
+            response = {"Error": {"Code": "AccessDeniedException"}}
+
+        class FailingGenerator:
+            def generate(self, question, results, prompt_template):
+                del question, results, prompt_template
+                raise FakeClientError(sensitive_error)
+
+        with self.assertLogs("rag_lab.learning.lab4", level="WARNING") as logs:
+            experiment = run_lab4_experiment(
+                self.dataset,
+                question=self.question,
+                expected_external_success=False,
+                prompt_path=self.prompt,
+                provider="bedrock",
+                model_id=sensitive_model_id,
+                region="ap-northeast-1",
+                bedrock_factory=lambda **settings: FailingGenerator(),
+            )
+
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / ".rag_lab"
+            saved = save_lab4_experiment(
+                workspace,
+                experiment,
+                prediction="権限不足として失敗する",
+                observation="安全な分類だけを確認した",
+            )
+            saved_text = saved.path.read_text(encoding="utf-8")
+            value = json.loads(saved_text)
+            progress = json.loads(
+                (workspace / "progress.json").read_text(encoding="utf-8")
+            )
+
+        self.assertEqual(experiment.external_call.failure_type, "authorization")
+        self.assertNotIn(sensitive_error, "\n".join(logs.output))
+        self.assertNotIn(sensitive_model_id, "\n".join(logs.output))
+        self.assertNotIn(sensitive_error, saved_text)
+        self.assertNotIn(sensitive_model_id, saved_text)
+        self.assertNotIn(experiment.baseline_answer.text, saved_text)
+        self.assertNotIn(self.dataset.chunks[0].text, saved_text)
+        self.assertEqual(value["summary"]["failure_type"], "authorization")
+        self.assertEqual(progress["labs"]["lab4"]["status"], "completed")
+
+    def test_live_configuration_is_validated_before_call(self) -> None:
+        with self.assertRaisesRegex(ValueError, "モデルID"):
+            run_lab4_experiment(
+                self.dataset,
+                question=self.question,
+                expected_external_success=True,
+                prompt_path=self.prompt,
+                provider="bedrock",
+                model_id="",
+            )
+        with self.assertRaisesRegex(ValueError, "リージョン"):
+            run_lab4_experiment(
+                self.dataset,
+                question=self.question,
+                expected_external_success=True,
+                prompt_path=self.prompt,
+                provider="bedrock",
+                model_id="valid-model",
+                region="bad region",
+            )
 
 
 class Lab5LearningTests(unittest.TestCase):
