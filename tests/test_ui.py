@@ -164,6 +164,31 @@ class StreamlitAppTests(unittest.TestCase):
         rendered_text = "\n".join(item.value for item in app.markdown)
         self.assertIn("v3案", rendered_text)
 
+    def test_lab8_runs_local_readiness_without_aws(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        with mock.patch.dict(
+            os.environ,
+            {
+                "AWS_ACCESS_KEY_ID": "must-not-be-used",
+                "AWS_SECRET_ACCESS_KEY": "must-not-be-used",
+            },
+        ):
+            app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+            app.selectbox[0].set_value("Lab 8: AWS実行環境").run(timeout=10)
+            app.text_area[0].set_value("認証と予算が要対応になる").run(
+                timeout=10
+            )
+            app.button[0].click().run(timeout=10)
+
+        self.assertEqual(app.exception, [])
+        self.assertIn("Lab 8", app.header[0].value)
+        metric_labels = [metric.label for metric in app.metric]
+        self.assertIn("HTTP status", metric_labels)
+        self.assertIn("引用", metric_labels)
+        warnings = "\n".join(item.value for item in app.warning)
+        self.assertIn("HTTP API認証は未設定", warnings)
+
     def test_lab4_runs_offline_simulated_api_without_credentials(self) -> None:
         from streamlit.testing.v1 import AppTest
 

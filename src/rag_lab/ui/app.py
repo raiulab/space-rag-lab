@@ -25,6 +25,7 @@ from rag_lab.ui.lab4 import render_lab4
 from rag_lab.ui.lab5 import render_lab5
 from rag_lab.ui.lab6 import render_lab6
 from rag_lab.ui.lab7 import render_lab7
+from rag_lab.ui.lab8 import render_lab8
 
 
 WORKSPACE = Path(".rag_lab")
@@ -53,13 +54,14 @@ def render_lab_catalog() -> None:
     st.subheader("8つのLab")
     for number, name in enumerate(LAB_NAMES, start=1):
         lab_id = f"lab{number}"
-        if number in {1, 2, 3, 4, 5, 6, 7}:
+        if number in {1, 2, 3, 4, 5, 6, 7, 8}:
             status = _progress_status(lab_id)
-            availability = (
-                "オフライン模擬対応・Bedrock任意"
-                if number == 4
-                else "オフライン対応"
-            )
+            if number == 4:
+                availability = "オフライン模擬対応・Bedrock任意"
+            elif number == 8:
+                availability = "ローカル準備対応・AWSデプロイ任意"
+            else:
+                availability = "オフライン対応"
             st.markdown(
                 f"**Lab {number} — {name}**　`{status}`　{availability}"
             )
@@ -364,6 +366,7 @@ def main() -> None:
             "Lab 5: 検索・要約・質問応答",
             "Lab 6: 回答精度の評価・改善",
             "Lab 7: プロンプト設計",
+            "Lab 8: AWS実行環境",
             "診断・比較: 評価結果と次の実験",
         ),
         key="selected_lab",
@@ -382,6 +385,8 @@ def main() -> None:
         render_lab6(WORKSPACE)
     elif selected_lab.startswith("Lab 7"):
         render_lab7(WORKSPACE)
+    elif selected_lab.startswith("Lab 8"):
+        render_lab8(WORKSPACE)
     else:
         render_diagnostics(WORKSPACE, REPORT_DIR)
 
