@@ -5,6 +5,7 @@ import binascii
 import json
 import logging
 import os
+from collections.abc import Callable
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -45,8 +46,12 @@ def _response(status_code: int, body: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
-    del context
+def handle_request(
+    event: dict[str, Any],
+    pipeline_factory: Callable[[], RAGPipeline],
+) -> dict[str, Any]:
+    """Handle one API Gateway event with an injectable local pipeline factory."""
+
     try:
         raw_body = event.get("body") or "{}"
         if event.get("isBase64Encoded"):
@@ -65,7 +70,7 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
                     )
                 },
             )
-        return _response(200, _pipeline().ask(question).to_dict())
+        return _response(200, pipeline_factory().ask(question).to_dict())
     except (binascii.Error, json.JSONDecodeError, TypeError, UnicodeDecodeError):
         return _response(400, {"error": "JSON形式のbodyを指定してください"})
     except Exception as error:
@@ -77,3 +82,8 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
                 "message": "リクエスト処理に失敗しました",
             },
         )
+
+
+def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
+    del context
+    return handle_request(event, _pipeline)

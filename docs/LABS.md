@@ -245,7 +245,9 @@ rag-lab evaluate --generator bedrock --prompt prompts/answer_v2_grounded.txt --r
 
 ## Lab 8: AWS上の実行環境
 
-ローカルで索引とテストが完成してから進みます。手順は `infra/README.md` にあります。
+ローカルで索引とテストが完成してから進みます。最初に`rag-lab ui`の「Lab 8: AWS実行環境」で、AWSに接続せずSAMテンプレートとLambda相当のHTTP入出力を確認します。
+
+ローカル準備の完了は、AWSへのデプロイ済みを意味しません。実AWS実習は任意で、認証、料金、外部送信を確認してから [infra/README.md](../infra/README.md) の手順を使います。
 
 ### 作業
 
@@ -257,7 +259,7 @@ rag-lab evaluate --generator bedrock --prompt prompts/answer_v2_grounded.txt --r
 
 ### 合格条件
 
-HTTPリクエストから回答まで動くことに加え、構成図、IAM権限、費用が発生する箇所、停止方法をREADMEへ残すこと。
+基礎編では、ローカルHTTPリクエストから回答・引用まで動き、テンプレートの要対応項目とIAM・費用・停止計画を説明できること。任意の実AWS実習では、実際のHTTPエンドポイントとログを確認し、実習後にリソースを削除すること。
 
 ## 最終課題
 

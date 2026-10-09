@@ -52,6 +52,7 @@ class ProgressStore:
                     "lab5": {"status": "not_started"},
                     "lab6": {"status": "not_started"},
                     "lab7": {"status": "not_started"},
+                    "lab8": {"status": "not_started"},
                 },
             }
         try:

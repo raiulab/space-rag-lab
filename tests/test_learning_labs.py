@@ -47,6 +47,12 @@ from rag_lab.learning.lab7 import (
     run_lab7_experiment,
     save_lab7_experiment,
 )
+from rag_lab.learning.lab8 import (
+    analyze_sam_template,
+    evaluate_lab8,
+    run_lab8_readiness,
+    save_lab8_experiment,
+)
 
 
 ROOT = Path(__file__).parents[1]
@@ -654,6 +660,97 @@ class Lab7LearningTests(unittest.TestCase):
             if check.code == "required_placeholders"
         )
         self.assertFalse(placeholder.passed)
+
+
+class Lab8LearningTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.dataset = bundled_dataset(RAW_DIR)
+        self.template = ROOT / "infra" / "template.yaml"
+        self.prompt = ROOT / "prompts" / "answer_v2_grounded.txt"
+
+    def _experiment(self):
+        return run_lab8_readiness(
+            self.dataset,
+            template_path=self.template,
+            prompt_path=self.prompt,
+        )
+
+    def test_local_lambda_smoke_and_template_findings_are_separate(self) -> None:
+        experiment = self._experiment()
+        findings = {item.code: item.status for item in experiment.findings}
+
+        self.assertEqual(experiment.smoke_status_code, 200)
+        self.assertTrue(experiment.smoke_answerable)
+        self.assertTrue(experiment.smoke_citation_ids)
+        self.assertEqual(findings["no_embedded_credentials"], "passed")
+        self.assertEqual(findings["bounded_concurrency"], "passed")
+        self.assertEqual(findings["http_authentication"], "review")
+        self.assertEqual(findings["bedrock_resource_scope"], "review")
+        self.assertEqual(findings["budget_guardrail"], "review")
+
+    def test_completion_requires_gap_acknowledgement_and_three_plans(self) -> None:
+        experiment = self._experiment()
+        incomplete = evaluate_lab8(
+            experiment,
+            prediction="認証と予算が要対応になる",
+            observation="ローカルHTTP応答200を確認",
+            iam_plan="",
+            cost_plan="",
+            cleanup_plan="",
+            acknowledged_finding_codes=(),
+        )
+        complete = evaluate_lab8(
+            experiment,
+            prediction="認証と予算が要対応になる",
+            observation="ローカルHTTP応答200と引用を確認",
+            iam_plan="利用モデルARNだけに限定する",
+            cost_plan="予算1000円で通知し、超過前に停止する",
+            cleanup_plan="sam delete後にログとS3を確認する",
+            acknowledged_finding_codes=experiment.review_finding_codes,
+        )
+
+        self.assertEqual(incomplete.status, "needs_review")
+        self.assertEqual(complete.status, "completed")
+
+    def test_saved_run_omits_answer_body_and_credentials(self) -> None:
+        experiment = self._experiment()
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / ".rag_lab"
+            with mock.patch.dict(
+                os.environ,
+                {"AWS_SECRET_ACCESS_KEY": "must-not-be-saved"},
+            ):
+                saved = save_lab8_experiment(
+                    workspace,
+                    experiment,
+                    prediction="認証と予算を要確認と予想",
+                    observation="HTTP 200と引用を確認",
+                    iam_plan="モデルARNを限定",
+                    cost_plan="予算通知後に停止",
+                    cleanup_plan="スタックと周辺リソースを削除",
+                    acknowledged_finding_codes=experiment.review_finding_codes,
+                )
+            saved_text = saved.path.read_text(encoding="utf-8")
+            value = json.loads(saved_text)
+            progress = json.loads(
+                (workspace / "progress.json").read_text(encoding="utf-8")
+            )
+
+        self.assertNotIn("must-not-be-saved", saved_text)
+        self.assertNotIn("模擬砂嵐の最も厳しい6時間", saved_text)
+        self.assertFalse(value["settings"]["external_aws_call"])
+        self.assertEqual(value["summary"]["smoke_status_code"], 200)
+        self.assertEqual(progress["labs"]["lab8"]["status"], "completed")
+
+    def test_embedded_credentials_and_missing_limits_are_flagged(self) -> None:
+        findings = analyze_sam_template(
+            "AWS_SECRET_ACCESS_KEY: example\nResources: {}\n"
+        )
+        statuses = {item.code: item.status for item in findings}
+
+        self.assertEqual(statuses["no_embedded_credentials"], "review")
+        self.assertEqual(statuses["bounded_timeout"], "review")
+        self.assertEqual(statuses["bounded_concurrency"], "review")
 
 
 if __name__ == "__main__":
