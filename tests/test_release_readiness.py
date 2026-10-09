@@ -21,6 +21,7 @@ class ReleaseReadinessTests(unittest.TestCase):
             ".github/dependabot.yml",
             "docs/releases/v0.1.0.md",
             "docs/releases/v0.1.1.md",
+            "docs/releases/v0.2.0.md",
         )
 
         missing = [path for path in required if not (PROJECT_ROOT / path).is_file()]
@@ -32,14 +33,18 @@ class ReleaseReadinessTests(unittest.TestCase):
         package_init = (PROJECT_ROOT / "src/rag_lab/__init__.py").read_text(
             encoding="utf-8"
         )
+        api_module = (PROJECT_ROOT / "src/rag_lab/api.py").read_text(
+            encoding="utf-8"
+        )
 
         project_version = re.search(r'^version = "([^"]+)"$', pyproject, re.MULTILINE)
         module_version = re.search(r'^__version__ = "([^"]+)"$', package_init, re.MULTILINE)
 
         self.assertIsNotNone(project_version)
         self.assertIsNotNone(module_version)
-        self.assertEqual(project_version.group(1), "0.1.1")
+        self.assertEqual(project_version.group(1), "0.2.0")
         self.assertEqual(module_version.group(1), project_version.group(1))
+        self.assertIn('version="0.2.0"', api_module)
         self.assertIn(
             'Repository = "https://github.com/raiulab/space-rag-lab"',
             pyproject,
