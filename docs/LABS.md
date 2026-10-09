@@ -154,6 +154,8 @@ rag-lab evaluate --mode bm25 --report reports/bm25.json
 rag-lab evaluate --mode hybrid --report reports/hybrid.json
 ```
 
+`rag-lab ui`の「診断・比較」を開くと、これらのJSONから評価値、失敗問題、原因分類、変更前後の差分を確認できます。ヒントは一度に答えを表示せず、「観察ポイント」「原因の切り分け」「次の操作」の順に開きます。
+
 ### 指標
 
 - `retrieval_hit_rate`: 正解文書が上位k件に入った割合
@@ -168,6 +170,7 @@ rag-lab evaluate --mode hybrid --report reports/hybrid.json
 3. 仮説を1つ立て、変更は1種類だけ行う。
 4. 同じ10問を再実行し、改善と副作用を記録する。
 5. 自分で回答不能問題を2問追加する。
+6. 「診断・比較」で改善した問題と新たに失敗した問題を確認し、学習レポートを保存する。
 
 ### 合格条件
 

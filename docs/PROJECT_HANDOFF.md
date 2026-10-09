@@ -229,7 +229,8 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/pdf_ingest.py`: `pypdf`によるPDF検証、ページ抽出、品質警告
 - `src/rag_lab/pdf_acceptance.py`: 公開PDFの代表ページ確認、受け入れ判定、本文を含まないMarkdown記録
 - `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件、Lab 2検索比較、Lab 3 RAG実験記録のサービス層
-- `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1〜3の学習画面
+- `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1〜3、評価診断・比較の学習画面
+- `src/rag_lab/learning/diagnostics.py`: 評価レポート検証、失敗分類、比較、学習レポート
 - `src/rag_lab/cli.py`: ui、ingest、ingest-pdf、accept-pdf、index、search、ask、summarize、evaluate、all
 
 ### 6.3 APIとAWS
@@ -249,7 +250,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で69件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
+標準ライブラリの`unittest`で78件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -377,6 +378,8 @@ Labごとの詳細な作業と合格条件は`docs/LABS.md`を参照する。
 - 段階的ヒント
 - 学習レポート出力
 
+状態: 2026-10-09に最初の縦切りを実装した。ローカルUIの「診断・比較」で`reports`直下の評価JSONを選び、4指標、失敗問題、検索・引用・回答内容・回答可能性の原因分類を確認できる。各失敗には観察、原因、次の操作の3段階ヒントを表示する。同じ問題ID集合を持つ2レポートでは指標差分、改善問題、新規失敗を比較する。学習レポートは回答本文とチャンク本文を複製せず、`.rag_lab/reports/`への保存またはMarkdownダウンロードに対応した。レポートは5 MB以下、直接配置されたJSON、既知schemaに限定して読み込む。
+
 ### Milestone 4: GitHub公開準備
 
 - LICENSEの選定と追加
@@ -455,7 +458,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者・作成者メールをGitHubのnoreply形式へ統一した。v0.1.0とセキュリティ強化版v0.1.1をPublicリポジトリとGitHub Releaseで公開済みである。次はMilestone 3の問題診断と比較へ進む。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0とセキュリティ強化版v0.1.1をPublicリポジトリとGitHub Releaseで公開済みである。次はMilestone 3の受け入れ確認後、Lab 4または5のUI化へ進む。
 
 ## 16. 参照したCodex運用方針
 
