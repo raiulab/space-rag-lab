@@ -20,9 +20,11 @@ from rag_lab.learning.storage import DatasetStorageError
 from rag_lab.pdf_ingest import PdfIngestError
 from rag_lab.ui.lab2 import render_lab2
 from rag_lab.ui.lab3 import render_lab3
+from rag_lab.ui.diagnostics import render_diagnostics
 
 
 WORKSPACE = Path(".rag_lab")
+REPORT_DIR = Path("reports")
 LAB_NAMES = (
     "技術文書・報告書の収集と加工",
     "Embedding生成とベクトル検索",
@@ -54,6 +56,7 @@ def render_lab_catalog() -> None:
             )
         else:
             st.markdown(f"Lab {number} — {name}　`準備中`")
+    st.markdown("**診断・比較 — Milestone 3**　`利用可能`　オフライン対応")
 
 
 def render_environment() -> None:
@@ -348,6 +351,7 @@ def main() -> None:
             "Lab 1: 文書の収集と加工",
             "Lab 2: Embeddingと検索比較",
             "Lab 3: RAGパイプライン",
+            "診断・比較: 評価結果と次の実験",
         ),
         key="selected_lab",
     )
@@ -355,8 +359,10 @@ def main() -> None:
         render_lab1()
     elif selected_lab.startswith("Lab 2"):
         render_lab2(WORKSPACE)
-    else:
+    elif selected_lab.startswith("Lab 3"):
         render_lab3(WORKSPACE)
+    else:
+        render_diagnostics(WORKSPACE, REPORT_DIR)
 
 
 main()

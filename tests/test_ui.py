@@ -1,4 +1,7 @@
 import importlib.util
+import json
+import os
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -97,6 +100,82 @@ class StreamlitAppTests(unittest.TestCase):
         self.assertIn("回答可能判定", metric_labels)
         rendered_text = "\n".join(item.value for item in app.success)
         self.assertIn("32 %", rendered_text)
+
+    def test_diagnostics_explains_how_to_create_first_report(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        original = Path.cwd()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                os.chdir(directory)
+                app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+                app.selectbox[0].set_value(
+                    "診断・比較: 評価結果と次の実験"
+                ).run(timeout=10)
+        finally:
+            os.chdir(original)
+
+        self.assertEqual(app.exception, [])
+        self.assertIn("診断・比較", app.header[0].value)
+        rendered_info = "\n".join(item.value for item in app.info)
+        self.assertIn("rag-lab all", rendered_info)
+
+    def test_diagnostics_shows_failures_and_saves_learning_report(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        report = {
+            "summary": {
+                "examples": 1,
+                "retrieval_hit_rate": 1.0,
+                "citation_hit_rate": 1.0,
+                "keyword_recall": 0.5,
+                "answerability_accuracy": 1.0,
+            },
+            "details": [
+                {
+                    "id": "sample-01",
+                    "question": "必要な数値を答えましたか？",
+                    "expected_answerable": True,
+                    "predicted_answerable": True,
+                    "retrieval_hit": True,
+                    "citation_hit": True,
+                    "keyword_recall": 0.5,
+                    "refusal_correct": True,
+                    "answer": "学習記録へ保存しない本文",
+                }
+            ],
+        }
+        original = Path.cwd()
+        try:
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                report_dir = root / "reports"
+                report_dir.mkdir()
+                (report_dir / "evaluation.json").write_text(
+                    json.dumps(report, ensure_ascii=False), encoding="utf-8"
+                )
+                os.chdir(root)
+                app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+                app.selectbox[0].set_value(
+                    "診断・比較: 評価結果と次の実験"
+                ).run(timeout=10)
+                app.text_area[0].set_value("回答内容の問題だと分かった").run(
+                    timeout=10
+                )
+                app.text_area[1].set_value("チャンク境界だけを変更する").run(
+                    timeout=10
+                )
+                app.button[-1].click().run(timeout=10)
+                saved = list((root / ".rag_lab" / "reports").glob("*.md"))
+                saved_text = saved[0].read_text(encoding="utf-8")
+        finally:
+            os.chdir(original)
+
+        self.assertEqual(app.exception, [])
+        self.assertIn("検索ヒット率", [metric.label for metric in app.metric])
+        self.assertIn("sample-01", "\n".join(item.value for item in app.markdown))
+        self.assertEqual(len(saved), 1)
+        self.assertNotIn("学習記録へ保存しない本文", saved_text)
 
 
 if __name__ == "__main__":
