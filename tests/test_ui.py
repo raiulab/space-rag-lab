@@ -101,6 +101,25 @@ class StreamlitAppTests(unittest.TestCase):
         rendered_text = "\n".join(item.value for item in app.success)
         self.assertIn("32 %", rendered_text)
 
+    def test_lab5_separates_search_summary_and_qa(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+        app.selectbox[0].set_value("Lab 5: 検索・要約・質問応答").run(timeout=10)
+        app.text_area[0].set_value(
+            "検索は候補、要約は文書、QAは回答を返す"
+        ).run(timeout=10)
+        app.button[0].click().run(timeout=10)
+
+        self.assertEqual(app.exception, [])
+        self.assertIn("Lab 5", app.header[0].value)
+        metric_labels = [metric.label for metric in app.metric]
+        self.assertIn("検索結果", metric_labels)
+        self.assertIn("要約元", metric_labels)
+        self.assertIn("QA引用", metric_labels)
+        rendered_text = "\n".join(item.value for item in app.success)
+        self.assertIn("6時間", rendered_text)
+
     def test_diagnostics_explains_how_to_create_first_report(self) -> None:
         from streamlit.testing.v1 import AppTest
 

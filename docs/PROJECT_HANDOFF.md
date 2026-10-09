@@ -228,8 +228,8 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/source_documents.py`: 形式共通の文書・ページ・ブロック型とチャンク変換
 - `src/rag_lab/pdf_ingest.py`: `pypdf`によるPDF検証、ページ抽出、品質警告
 - `src/rag_lab/pdf_acceptance.py`: 公開PDFの代表ページ確認、受け入れ判定、本文を含まないMarkdown記録
-- `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件、Lab 2検索比較、Lab 3 RAG実験記録のサービス層
-- `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1〜3、評価診断・比較の学習画面
+- `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件、Lab 2検索比較、Lab 3 RAG、Lab 5検索・要約・QA実験記録のサービス層
+- `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1〜3・5、評価診断・比較の学習画面
 - `src/rag_lab/learning/diagnostics.py`: 評価レポート検証、失敗分類、比較、学習レポート
 - `src/rag_lab/cli.py`: ui、ingest、ingest-pdf、accept-pdf、index、search、ask、summarize、evaluate、all
 
@@ -250,7 +250,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で78件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
+標準ライブラリの`unittest`で83件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -300,7 +300,7 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 - プロンプト比較はBedrock等のLLMを接続しなければ十分に評価できない。
 - FastAPIの検索・要約エンドポイントは未実装である。
 - AWS SAMテンプレートは作成済みだが、SAM CLIによる実デプロイ検証はしていない。
-- Lab 4以降の操作画面、詳細な問題診断、評価比較、公開レポート作成は未実装である。
+- Lab 4・6〜8の操作画面と、本番向けAPI連携・認証認可は未実装である。
 - PDF取り込みは文字レイヤーだけに対応し、OCR、表構造、図、一般画像解析は未実装である。
 - `rag-lab all`は固定パスの索引と評価レポートを更新するため、同じcheckoutで複数プロセスから同時実行せず、逐次実行する。
 
@@ -458,7 +458,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0とセキュリティ強化版v0.1.1をPublicリポジトリとGitHub Releaseで公開済みである。次はMilestone 3の受け入れ確認後、Lab 4または5のUI化へ進む。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 5の検索・1文書要約・QA比較画面と、本文を複製しない学習記録を追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0とセキュリティ強化版v0.1.1をPublicリポジトリとGitHub Releaseで公開済みである。次はLab 5の受け入れ確認後、Lab 4の任意LLM API連携UIへ進む。
 
 ## 16. 参照したCodex運用方針
 
