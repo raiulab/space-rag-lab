@@ -468,7 +468,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜8の画面と学習記録を追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0、v0.1.1、Milestone 3とLab 5を含むv0.2.0をPublicリポジトリとGitHub Releaseで公開済みである。Lab 4、6、7は`main`へマージ済みで、現在は`feature/lab8-aws-readiness-ui`でLab 8を検証中である。今後のブランチ名に`codex/`は使わず、機能開発は`feature/`、リリース準備は`release/`を使う。次はLab 8をレビュー・マージし、基礎編の通し受け入れと次リリース準備へ進む。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜8の画面と学習記録を追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0、v0.1.1、Milestone 3とLab 5を含むv0.2.0をPublicリポジトリとGitHub Releaseで公開済みである。Lab 4、6、7、8は`main`へマージ済みで、基礎編のLab 1〜8はローカルで通して学べる。今後のブランチ名に`codex/`は使わず、機能開発は`feature/`、文書更新は`docs/`、リリース準備は`release/`を使う。次は基礎編の通し受け入れを行い、次リリースを準備する。
 
 ## 16. 参照したCodex運用方針
 
