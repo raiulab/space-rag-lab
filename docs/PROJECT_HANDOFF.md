@@ -398,6 +398,8 @@ GitHub Pagesは必要になった時点で、公開用ガイドまたはラン�
 
 2026-10-09にv0.1.1のセキュリティ強化を行った。GitHub Actionsの参照を完全なcommit SHAへ固定し、`pip-audit`、CodeQL、Dependabotを追加した。Lambdaでは2〜500文字の入力制限を揃え、内部例外の型・メッセージをHTTPレスポンスへ含めない。Secret scanning、push protection、Dependabot alerts/security updates、private vulnerability reportingを有効化し、`main`では必須CI、linear history、force push・削除禁止を設定した。PDF解析の別プロセス隔離はクロスプラットフォーム設計が必要なため、信頼できないPDFを扱わない既知制約として次のセキュリティ課題へ分離した。
 
+2026-10-09にv0.2.0を公開した。Milestone 3として評価JSONの可視化、失敗分類、3段階ヒント、変更前後比較、本文を複製しない学習レポートを追加した。Lab 5では検索、1文書要約、質問応答を同じdatasetと検索条件で比較し、入力・出力・根拠の違いを学べるローカルUIを追加した。APIキーなしの経路と従来評価値を維持している。
+
 ## 11. 学習アプリの安全要件
 
 - 任意のシェル文字列を利用者入力から実行しない。
@@ -458,7 +460,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 5の検索・1文書要約・QA比較画面と、本文を複製しない学習記録を追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0とセキュリティ強化版v0.1.1をPublicリポジトリとGitHub Releaseで公開済みである。次はLab 5の受け入れ確認後、Lab 4の任意LLM API連携UIへ進む。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 5の検索・1文書要約・QA比較画面と、本文を複製しない学習記録を追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0、v0.1.1、Milestone 3とLab 5を含むv0.2.0をPublicリポジトリとGitHub Releaseで公開済みである。次はLab 4の任意LLM API連携UIへ進む。
 
 ## 16. 参照したCodex運用方針
 
