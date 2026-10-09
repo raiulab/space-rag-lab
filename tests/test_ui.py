@@ -120,6 +120,29 @@ class StreamlitAppTests(unittest.TestCase):
         rendered_text = "\n".join(item.value for item in app.success)
         self.assertIn("6時間", rendered_text)
 
+    def test_lab6_compares_one_change_on_the_same_questions(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+        app.selectbox[0].set_value("Lab 6: 回答精度の評価・改善").run(
+            timeout=10
+        )
+        app.text_area[0].set_value("次元を下げると必須語再現率が下がる").run(
+            timeout=10
+        )
+        app.text_area[1].set_value("ハッシュ衝突が増え根拠文が変わる").run(
+            timeout=10
+        )
+        app.button[0].click().run(timeout=15)
+
+        self.assertEqual(app.exception, [])
+        self.assertIn("Lab 6", app.header[0].value)
+        metric_labels = [metric.label for metric in app.metric]
+        self.assertIn("検索ヒット率", metric_labels)
+        self.assertIn("必須語再現率", metric_labels)
+        rendered_code = "\n".join(item.value for item in app.code)
+        self.assertIn("europa-01", rendered_code)
+
     def test_lab4_runs_offline_simulated_api_without_credentials(self) -> None:
         from streamlit.testing.v1 import AppTest
 
