@@ -228,8 +228,8 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/source_documents.py`: 形式共通の文書・ページ・ブロック型とチャンク変換
 - `src/rag_lab/pdf_ingest.py`: `pypdf`によるPDF検証、ページ抽出、品質警告
 - `src/rag_lab/pdf_acceptance.py`: 公開PDFの代表ページ確認、受け入れ判定、本文を含まないMarkdown記録
-- `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件、Lab 2検索比較、Lab 3 RAG、Lab 4任意LLM API、Lab 5検索・要約・QA、Lab 6評価・改善実験記録のサービス層
-- `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1〜6、評価診断・比較の学習画面
+- `src/rag_lab/learning/`: dataset保存、進捗、Lab 1完了条件、Lab 2検索比較、Lab 3 RAG、Lab 4任意LLM API、Lab 5検索・要約・QA、Lab 6評価・改善、Lab 7プロンプト契約検査と実験記録のサービス層
+- `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1〜7、評価診断・比較の学習画面
 - `src/rag_lab/learning/diagnostics.py`: 評価レポート検証、失敗分類、比較、学習レポート
 - `src/rag_lab/cli.py`: ui、ingest、ingest-pdf、accept-pdf、index、search、ask、summarize、evaluate、all
 
@@ -250,7 +250,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で98件ある。UI/PDF extraがある環境ではStreamlitとPDFも検査する。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。Bedrockの単体テストは注入したテストクライアントを使い、AWSへ接続しない。2026-10-09の`feature/lab6-evaluation-ui`では98件すべて成功した。
+標準ライブラリの`unittest`で104件ある。UI/PDF extraがある環境ではStreamlitとPDFも検査する。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。Bedrockの単体テストは注入したテストクライアントを使い、AWSへ接続しない。2026-10-09の`feature/lab7-prompt-design-ui`では104件すべて成功した。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -300,7 +300,7 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 - プロンプト比較はBedrock等のLLMを接続しなければ十分に評価できない。
 - FastAPIの検索・要約エンドポイントは未実装である。
 - AWS SAMテンプレートは作成済みだが、SAM CLIによる実デプロイ検証はしていない。
-- Lab 7〜8の操作画面と、本番向けAPI連携・認証認可は未実装である。
+- Lab 8の操作画面と、本番向けAPI連携・認証認可は未実装である。
 - PDF取り込みは文字レイヤーだけに対応し、OCR、表構造、図、一般画像解析は未実装である。
 - `rag-lab all`は固定パスの索引と評価レポートを更新するため、同じcheckoutで複数プロセスから同時実行せず、逐次実行する。
 
@@ -404,6 +404,8 @@ GitHub Pagesは必要になった時点で、公開用ガイドまたはラン�
 
 2026-10-09にLab 6の評価・改善UIを実装した。付属データの正解10問を使い、検索方式、top-k、Embedding次元のうち1項目だけを変更して、4指標、改善問題、新規失敗を比較する。予想、仮説、観察、悪化例の確認、次の1変更を完了条件にした。学習記録には設定、指標、失敗問題ID、利用者の記述だけを保存し、回答本文とチャンク本文は複製しない。別のデータセットは専用の正解データなしに自動評価しない。Embedding次元を384から64へ変えた受け入れ試験では、必須語再現率が0.95から0.85に低下し、`europa-01`が新規失敗になった。結果は`reports/lab6_offline_acceptance_2026-10-09.md`に記録した。
 
+2026-10-09にLab 7のプロンプト設計UIを実装した。v1、v2、JSON出力契約を追加したv3案に対し、必須プレースホルダー、根拠限定、文書内命令の非信頼化、`chunk_id`引用、固定拒否、JSONの3必須キーを静的に検査する。JSONL出力例の構文・schemaエラー率も測定する。文書内の「それまでの指示を無視」は実行せず、展開後プロンプトのデータとして表示する。v3案は既存版を上書きせず`.rag_lab/prompts/`へ新規保存する。構造検査はLLMが実際に従うことの証明ではないため、実LLMの性能比較と区別する。受け入れ結果は`reports/lab7_offline_acceptance_2026-10-09.md`に記録した。
+
 ## 11. 学習アプリの安全要件
 
 - 任意のシェル文字列を利用者入力から実行しない。
@@ -464,7 +466,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜6の画面と、本文を複製しない学習記録を追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0、v0.1.1、Milestone 3とLab 5を含むv0.2.0をPublicリポジトリとGitHub Releaseで公開済みである。Lab 4は`main`へマージ済みで、現在は`feature/lab6-evaluation-ui`でLab 6を検証中である。今後のブランチ名に`codex/`は使わず、機能開発は`feature/`、リリース準備は`release/`を使う。次はLab 6をレビュー・マージし、Lab 7のプロンプト比較UIへ進む。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜7の画面と、本文を不要に複製しない学習記録を追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0、v0.1.1、Milestone 3とLab 5を含むv0.2.0をPublicリポジトリとGitHub Releaseで公開済みである。Lab 4とLab 6は`main`へマージ済みで、現在は`feature/lab7-prompt-design-ui`でLab 7を検証中である。今後のブランチ名に`codex/`は使わず、機能開発は`feature/`、リリース準備は`release/`を使う。次はLab 7をレビュー・マージし、Lab 8のAWS学習UIへ進む。
 
 ## 16. 参照したCodex運用方針
 

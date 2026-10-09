@@ -217,6 +217,19 @@ rag-lab evaluate --mode hybrid --report reports/hybrid.json
 
 ### 実行
 
+まずオフラインでv1/v2とv3案を比較します。
+
+```bash
+python -m pip install -e '.[ui,pdf]'
+rag-lab ui
+```
+
+「Lab 7: プロンプト設計」で、根拠限定、文書内命令の無視、引用、回答不能、JSON形式の契約を確認します。v3案は`.rag_lab/prompts/`へ別ファイルとして保存され、v1/v2は上書きされません。
+
+構造検査はプロンプトにルールがあることを確認するもので、LLMが実際に守ることの証明ではありません。実際のLLMによる比較は任意で、送信データと料金を確認したうえで行います。
+
+任意LLMで同じ評価を行う場合:
+
 ```bash
 rag-lab evaluate --generator bedrock --prompt prompts/answer_v1.txt --report reports/prompt_v1.json
 rag-lab evaluate --generator bedrock --prompt prompts/answer_v2_grounded.txt --report reports/prompt_v2.json
@@ -228,7 +241,7 @@ rag-lab evaluate --generator bedrock --prompt prompts/answer_v2_grounded.txt --r
 
 ### 合格条件
 
-プロンプトの変更理由、対象の失敗、評価結果を1セットで説明できること。
+プロンプトの変更理由、対象の失敗、構造検査または実LLMの評価結果を1セットで説明できること。構造検査とLLMの実挙動評価を混同しないこと。
 
 ## Lab 8: AWS上の実行環境
 

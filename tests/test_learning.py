@@ -115,6 +115,7 @@ class ProgressStoreTests(unittest.TestCase):
         self.assertEqual(progress["labs"]["lab4"]["status"], "not_started")
         self.assertEqual(progress["labs"]["lab5"]["status"], "not_started")
         self.assertEqual(progress["labs"]["lab6"]["status"], "not_started")
+        self.assertEqual(progress["labs"]["lab7"]["status"], "not_started")
 
     def test_update_preserves_existing_fields(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
