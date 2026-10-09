@@ -1,6 +1,6 @@
 # Space Research RAG Lab プロジェクト引き継ぎ書
 
-最終更新: 2026-10-06
+最終更新: 2026-10-09
 
 この文書は、旧スレッドで行った検討・実装・検証を、新しいCodexプロジェクトの新しいスレッドへ引き継ぐための永続的なコンテキストである。新しいスレッドは会話履歴を知っていると仮定せず、この文書、`AGENTS.md`、`README.md`、`docs/LABS.md`、実際のコードとテストを情報源として扱うこと。
 
@@ -249,7 +249,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で63件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
+標準ライブラリの`unittest`で69件ある。UI/PDF extraを導入したPython 3.10.6環境で直近の確認ではすべて成功している。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -301,6 +301,7 @@ Lambdaハンドラーも、抽出式生成器を使ったローカル試験でHT
 - AWS SAMテンプレートは作成済みだが、SAM CLIによる実デプロイ検証はしていない。
 - Lab 4以降の操作画面、詳細な問題診断、評価比較、公開レポート作成は未実装である。
 - PDF取り込みは文字レイヤーだけに対応し、OCR、表構造、図、一般画像解析は未実装である。
+- `rag-lab all`は固定パスの索引と評価レポートを更新するため、同じcheckoutで複数プロセスから同時実行せず、逐次実行する。
 
 これらを、説明なしに「不具合だから全部直す」のではなく、どれを教材として維持し、どれを学習アプリ側で案内するか区別すること。
 
@@ -392,6 +393,8 @@ GitHub Pagesは必要になった時点で、公開用ガイドまたはラン�
 
 公開候補のローカル検証では、UI/PDF込み63件、依存を無効化したコア63件（24件skip）、Ruff、`rag-lab all`、代表質問、Python 3.10.6の新規仮想環境からのeditable install、wheel作成、依存整合性検査が成功した。オフライン評価値はretrieval 1.00、citation 0.80、keyword 0.95、answerability 0.80で従来値を維持した。GitHub ActionsでもUbuntu 24.04上のPython 3.10〜3.12コア経路と、Python 3.12のUI/PDF全テストが成功した。
 
+2026-10-09にv0.1.1のセキュリティ強化を行った。GitHub Actionsの参照を完全なcommit SHAへ固定し、`pip-audit`、CodeQL、Dependabotを追加した。Lambdaでは2〜500文字の入力制限を揃え、内部例外の型・メッセージをHTTPレスポンスへ含めない。Secret scanning、push protection、Dependabot alerts/security updates、private vulnerability reportingを有効化し、`main`では必須CI、linear history、force push・削除禁止を設定した。PDF解析の別プロセス隔離はクロスプラットフォーム設計が必要なため、信頼できないPDFを扱わない既知制約として次のセキュリティ課題へ分離した。
+
 ## 11. 学習アプリの安全要件
 
 - 任意のシェル文字列を利用者入力から実行しない。
@@ -452,7 +455,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者・作成者メールをGitHubのnoreply形式へ統一した。v0.1.0をPublicリポジトリとGitHub Releaseで公開済みである。次はMilestone 3の問題診断と比較へ進む。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者・作成者メールをGitHubのnoreply形式へ統一した。v0.1.0とセキュリティ強化版v0.1.1をPublicリポジトリとGitHub Releaseで公開済みである。次はMilestone 3の問題診断と比較へ進む。
 
 ## 16. 参照したCodex運用方針
 

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import base64
+import binascii
 import json
+import logging
 import os
 from functools import lru_cache
 from pathlib import Path
@@ -10,6 +12,11 @@ from typing import Any
 from .generation import make_generator
 from .pipeline import RAGPipeline
 from .retrieval import Retriever
+
+
+LOGGER = logging.getLogger(__name__)
+MIN_QUESTION_LENGTH = 2
+MAX_QUESTION_LENGTH = 500
 
 
 @lru_cache(maxsize=1)
@@ -43,13 +50,30 @@ def lambda_handler(event: dict[str, Any], context: Any) -> dict[str, Any]:
     try:
         raw_body = event.get("body") or "{}"
         if event.get("isBase64Encoded"):
-            raw_body = base64.b64decode(raw_body).decode("utf-8")
+            raw_body = base64.b64decode(raw_body, validate=True).decode("utf-8")
         body = json.loads(raw_body)
+        if not isinstance(body, dict):
+            return _response(400, {"error": "JSONオブジェクトを指定してください"})
         question = str(body.get("question", "")).strip()
-        if len(question) < 2:
-            return _response(400, {"error": "question は2文字以上で指定してください"})
+        if not MIN_QUESTION_LENGTH <= len(question) <= MAX_QUESTION_LENGTH:
+            return _response(
+                400,
+                {
+                    "error": (
+                        f"question は{MIN_QUESTION_LENGTH}文字以上"
+                        f"{MAX_QUESTION_LENGTH}文字以下で指定してください"
+                    )
+                },
+            )
         return _response(200, _pipeline().ask(question).to_dict())
-    except (json.JSONDecodeError, TypeError):
+    except (binascii.Error, json.JSONDecodeError, TypeError, UnicodeDecodeError):
         return _response(400, {"error": "JSON形式のbodyを指定してください"})
-    except Exception as exc:  # Lambda logging is handled by the platform
-        return _response(500, {"error": type(exc).__name__, "message": str(exc)})
+    except Exception as error:
+        LOGGER.error("Lambda request failed: %s", type(error).__name__)
+        return _response(
+            500,
+            {
+                "error": "internal_server_error",
+                "message": "リクエスト処理に失敗しました",
+            },
+        )

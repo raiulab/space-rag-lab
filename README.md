@@ -6,11 +6,11 @@
 
 教材の文書・数値・組織はすべて架空です。実在するミッションの判断や設計には使用しないでください。
 
-## v0.1.0の公開範囲
+## v0.1.1の公開範囲
 
 この版では、APIキー不要のCLIと、Lab 1〜3のローカル学習ナビゲーションが動作します。Lab 4〜8にはガイド、CLI、一部のAPI・Bedrock・AWS基盤がありますが、Lab 1〜3と同じブラウザ学習画面はまだありません。
 
-| 項目 | v0.1.0の状態 |
+| 項目 | v0.1.1の状態 |
 | --- | --- |
 | Lab 1 文書加工・PDF取り込み | UI・CLI実装済み |
 | Lab 2 検索比較 | UI・CLI実装済み |
@@ -171,6 +171,8 @@ tests/                    回帰テスト
 
 ## ローカルAPI
 
+このAPIは学習用です。認証、利用者ごとの権限、レート制限を備えた公開サービスではありません。既定の`127.0.0.1`から外部ネットワークへ公開しないでください。
+
 ```bash
 python -m pip install -e '.[api]'
 uvicorn rag_lab.api:app --reload
@@ -191,6 +193,12 @@ rag-lab ask "TMR方式の試験結果を説明してください" --generator be
 ```
 
 AWS配置は [infra/README.md](infra/README.md) を参照してください。
+
+## セキュリティ
+
+公開リポジトリではSecret scanningとpush protectionを有効にし、依存関係は`pip-audit`とDependabot、PythonコードはCodeQLで継続検査します。GitHub Actionsは検証したcommit SHAへ固定しています。脆弱性は公開Issueではなく、GitHubのPrivate vulnerability reportingから連絡してください。
+
+PDFにはサイズ・ページ数・暗号化の検査がありますが、PDFパーサーをOSレベルで隔離してはいません。出所を信頼できないPDF、機密文書、利用条件が不明な文書を入力しないでください。詳細は[SECURITY.md](SECURITY.md)を参照してください。
 
 ## テスト
 

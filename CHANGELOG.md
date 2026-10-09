@@ -2,6 +2,29 @@
 
 このプロジェクトの利用者に影響する変更を記録します。
 
+## [0.1.1] - 2026-10-09
+
+公開リポジトリと任意APIのセキュリティを強化したメンテナンスリリースです。
+
+### Added
+
+- Python依存関係を検査する`pip-audit` CI
+- Pythonコードを検査するCodeQL workflow
+- pipとGitHub Actionsを月次確認するDependabot設定
+- Lambda入力検証とエラー秘匿の回帰テスト
+
+### Changed
+
+- GitHub Actionsを検証済みcommit SHAへ固定
+- Lambdaの質問長をローカルAPIと同じ2〜500文字へ統一
+- 内部例外の型・メッセージをHTTP 500レスポンスへ含めないよう変更
+- ローカルAPIとPDF解析のセキュリティ境界を文書化
+
+### Security
+
+- GitHub Secret scanning、push protection、Dependabot security updates、private vulnerability reportingを有効化
+- `main`のforce push・削除を禁止し、必須CIを設定
+
 ## [0.1.0] - 2026-10-06
 
 初回公開版です。
