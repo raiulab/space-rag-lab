@@ -22,6 +22,7 @@ class ReleaseReadinessTests(unittest.TestCase):
             "docs/releases/v0.1.0.md",
             "docs/releases/v0.1.1.md",
             "docs/releases/v0.2.0.md",
+            "docs/releases/v0.3.0.md",
         )
 
         missing = [path for path in required if not (PROJECT_ROOT / path).is_file()]
@@ -42,9 +43,9 @@ class ReleaseReadinessTests(unittest.TestCase):
 
         self.assertIsNotNone(project_version)
         self.assertIsNotNone(module_version)
-        self.assertEqual(project_version.group(1), "0.2.0")
+        self.assertEqual(project_version.group(1), "0.3.0")
         self.assertEqual(module_version.group(1), project_version.group(1))
-        self.assertIn('version="0.2.0"', api_module)
+        self.assertIn('version="0.3.0"', api_module)
         self.assertIn(
             'Repository = "https://github.com/raiulab/space-rag-lab"',
             pyproject,

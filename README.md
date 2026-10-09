@@ -6,9 +6,9 @@
 
 教材の文書・数値・組織はすべて架空です。実在するミッションの判断や設計には使用しないでください。
 
-## 現在の開発版
+## v0.3.0の公開範囲
 
-公開版v0.2.0を基礎に、APIキー不要のCLIとLab 1〜8のローカル学習ナビゲーションが動作します。Lab 4はオフライン模擬APIを既定とし、利用者が明示的に確認した場合だけAmazon Bedrockを呼び出せます。Lab 8はSAMテンプレートとLambda入出力のローカル準備までで、AWSへの実デプロイは任意であり、UIからは実行しません。
+APIキー不要のCLIとLab 1〜8のローカル学習ナビゲーションが動作します。Lab 4はオフライン模擬APIを既定とし、利用者が明示的に確認した場合だけAmazon Bedrockを呼び出せます。Lab 8はSAMテンプレートとLambda入出力のローカル準備までで、AWSへの実デプロイは任意であり、UIからは実行しません。
 
 | 項目 | 現在の状態 |
 | --- | --- |
@@ -271,6 +271,9 @@ ruff check .
 
 - 変更履歴: [CHANGELOG.md](CHANGELOG.md)
 - v0.1.0リリースノート: [docs/releases/v0.1.0.md](docs/releases/v0.1.0.md)
+- v0.1.1リリースノート: [docs/releases/v0.1.1.md](docs/releases/v0.1.1.md)
+- v0.2.0リリースノート: [docs/releases/v0.2.0.md](docs/releases/v0.2.0.md)
+- v0.3.0リリースノート: [docs/releases/v0.3.0.md](docs/releases/v0.3.0.md)
 - 貢献方法: [CONTRIBUTING.md](CONTRIBUTING.md)
 - セキュリティ方針: [SECURITY.md](SECURITY.md)
 - 第三者パッケージ: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)

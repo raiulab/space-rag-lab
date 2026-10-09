@@ -408,6 +408,8 @@ GitHub Pagesは必要になった時点で、公開用ガイドまたはラン�
 
 2026-10-09にLab 8のAWSデプロイ前準備UIを実装した。AWS認証情報、AWS API、SAM CLIを使わず、付属データと抽出式生成器でLambda相当のHTTP入出力をローカル確認する。`infra/template.yaml`の認証情報非埋め込み、timeout、同時実行数、ログ保持、tracingを合格と判定し、HTTP API認証、Bedrock ResourceのモデルARN限定、予算通知を実デプロイ前の要対応として示す。完了にはこれらの確認とIAM・料金・削除計画の記録が必要である。完了表示はローカル準備だけを意味し、AWSへの配置済みを意味しない。受け入れ結果は`reports/lab8_local_readiness_2026-10-09.md`に記録した。
 
+2026-10-09にv0.3.0公開候補の準備を開始した。Lab 4・6・7・8を公開範囲へまとめ、基礎編のLab 1〜8をAPIキーなしで一続きに学べる版とする。バージョン、変更履歴、README、専用リリースノート、リリース検査テストを`release/v0.3.0`で更新し、タグとGitHub Releaseは候補PRの検証・承認後に作成する。
+
 ## 11. 学習アプリの安全要件
 
 - 任意のシェル文字列を利用者入力から実行しない。
@@ -468,7 +470,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜8の画面と学習記録を追加した。公開前に個人メールアドレスを履歴へ残さないため、全コミットの作者メールをGitHubのnoreply形式へ統一した。v0.1.0、v0.1.1、Milestone 3とLab 5を含むv0.2.0をPublicリポジトリとGitHub Releaseで公開済みである。Lab 4、6、7、8は`main`へマージ済みで、基礎編のLab 1〜8はローカルで通して学べる。今後のブランチ名に`codex/`は使わず、機能開発は`feature/`、文書更新は`docs/`、リリース準備は`release/`を使う。次は基礎編の通し受け入れを行い、次リリースを準備する。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜8の画面と学習記録を追加した。v0.1.0、v0.1.1、Milestone 3とLab 5を含むv0.2.0をPublicリポジトリとGitHub Releaseで公開済みである。Lab 4、6、7、8は`main`へマージ済みで、基礎編のLab 1〜8はローカルで通して学べる。ローカルGitの作者メールはGitHub noreply形式だが、一部の過去のGitHub squash mergeコミットにはアカウント側のメールアドレスが作者情報として残っている。既存タグを含む履歴書き換えは自動で行わず、v0.3.0候補は作者情報を保持するrebase mergeを使って新たな露出を避ける。今後のブランチ名に`codex/`は使わず、機能開発は`feature/`、文書更新は`docs/`、リリース準備は`release/`を使う。現在は`release/v0.3.0`で公開候補を準備中であり、次は通し受け入れ、公開物監査、候補PRの確認を行う。
 
 ## 16. 参照したCodex運用方針
 
