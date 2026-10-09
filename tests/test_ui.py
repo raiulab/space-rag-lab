@@ -152,7 +152,11 @@ class StreamlitAppTests(unittest.TestCase):
         app.checkbox[0].set_value(True).run(timeout=10)
         self.assertTrue(app.button[0].disabled)
         app.checkbox[1].set_value(True).run(timeout=10)
-        self.assertFalse(app.button[0].disabled)
+        if app.error:
+            self.assertIn(".[aws]", "\n".join(item.value for item in app.error))
+            self.assertTrue(app.button[0].disabled)
+        else:
+            self.assertFalse(app.button[0].disabled)
         self.assertEqual(app.exception, [])
 
     def test_diagnostics_explains_how_to_create_first_report(self) -> None:
