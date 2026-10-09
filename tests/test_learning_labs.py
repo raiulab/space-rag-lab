@@ -24,6 +24,11 @@ from rag_lab.learning.lab3 import (
     run_lab3_experiment,
     save_lab3_experiment,
 )
+from rag_lab.learning.lab5 import (
+    evaluate_lab5,
+    run_lab5_experiment,
+    save_lab5_experiment,
+)
 
 
 ROOT = Path(__file__).parents[1]
@@ -214,6 +219,84 @@ class Lab3LearningTests(unittest.TestCase):
         self.assertTrue(value["summary"]["predicted_answerable"])
         self.assertEqual(value["settings"]["prompt_version"], "answer_v2_grounded.txt")
         self.assertEqual(progress["labs"]["lab3"]["status"], "completed")
+
+
+class Lab5LearningTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.dataset = bundled_dataset(RAW_DIR)
+        self.prompt = ROOT / "prompts" / "answer_v2_grounded.txt"
+
+    def _experiment(self):
+        return run_lab5_experiment(
+            self.dataset,
+            search_query="低電力時の安全モード",
+            summary_document_id="mars_power_2026",
+            qa_question="蓄電池の設計目標との差は何時間ですか？",
+            prompt_path=self.prompt,
+        )
+
+    def test_search_summary_and_qa_have_distinct_traceable_outputs(self) -> None:
+        experiment = self._experiment()
+
+        self.assertEqual(len(experiment.search_results), 5)
+        self.assertTrue(all(result.chunk.chunk_id for result in experiment.search_results))
+        self.assertTrue(experiment.summary_answerable)
+        self.assertIn("mars_power_2026", experiment.summary_source_chunk_ids[0])
+        self.assertIn("6時間", experiment.qa_answer.text)
+        self.assertTrue(experiment.qa_answer.citations)
+
+    def test_completion_requires_prediction_and_observation(self) -> None:
+        experiment = self._experiment()
+
+        incomplete = evaluate_lab5(experiment, prediction="", observation="")
+        complete = evaluate_lab5(
+            experiment,
+            prediction="検索は候補、要約は1文書、QAは回答を返す",
+            observation="3機能で出力と根拠の単位が異なった",
+        )
+
+        self.assertEqual(incomplete.status, "in_progress")
+        self.assertEqual(complete.status, "completed")
+
+    def test_saved_run_omits_generated_and_source_bodies(self) -> None:
+        experiment = self._experiment()
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / ".rag_lab"
+            saved = save_lab5_experiment(
+                workspace,
+                experiment,
+                prediction="3機能の出力形式が異なる",
+                observation="検索結果、要約元、QA引用を確認した",
+            )
+            saved_text = saved.path.read_text(encoding="utf-8")
+            value = json.loads(saved_text)
+            progress = json.loads(
+                (workspace / "progress.json").read_text(encoding="utf-8")
+            )
+
+        self.assertNotIn(experiment.summary_text, saved_text)
+        self.assertNotIn(experiment.qa_answer.text, saved_text)
+        self.assertNotIn(self.dataset.chunks[0].text, saved_text)
+        self.assertIn("summary_source_chunk_ids", value["summary"])
+        self.assertEqual(progress["labs"]["lab5"]["status"], "completed")
+
+    def test_question_length_is_validated(self) -> None:
+        with self.assertRaisesRegex(ValueError, "500文字以下"):
+            run_lab5_experiment(
+                self.dataset,
+                search_query="検索語",
+                summary_document_id="mars_power_2026",
+                qa_question="あ" * 501,
+                prompt_path=self.prompt,
+            )
+        with self.assertRaisesRegex(ValueError, "document_id"):
+            run_lab5_experiment(
+                self.dataset,
+                search_query="検索語",
+                summary_document_id="missing-document",
+                qa_question="有効な質問",
+                prompt_path=self.prompt,
+            )
 
 
 if __name__ == "__main__":

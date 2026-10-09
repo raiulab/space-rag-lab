@@ -21,6 +21,7 @@ from rag_lab.pdf_ingest import PdfIngestError
 from rag_lab.ui.lab2 import render_lab2
 from rag_lab.ui.lab3 import render_lab3
 from rag_lab.ui.diagnostics import render_diagnostics
+from rag_lab.ui.lab5 import render_lab5
 
 
 WORKSPACE = Path(".rag_lab")
@@ -49,7 +50,7 @@ def render_lab_catalog() -> None:
     st.subheader("8つのLab")
     for number, name in enumerate(LAB_NAMES, start=1):
         lab_id = f"lab{number}"
-        if number <= 3:
+        if number in {1, 2, 3, 5}:
             status = _progress_status(lab_id)
             st.markdown(
                 f"**Lab {number} — {name}**　`{status}`　オフライン対応"
@@ -351,6 +352,7 @@ def main() -> None:
             "Lab 1: 文書の収集と加工",
             "Lab 2: Embeddingと検索比較",
             "Lab 3: RAGパイプライン",
+            "Lab 5: 検索・要約・質問応答",
             "診断・比較: 評価結果と次の実験",
         ),
         key="selected_lab",
@@ -361,6 +363,8 @@ def main() -> None:
         render_lab2(WORKSPACE)
     elif selected_lab.startswith("Lab 3"):
         render_lab3(WORKSPACE)
+    elif selected_lab.startswith("Lab 5"):
+        render_lab5(WORKSPACE)
     else:
         render_diagnostics(WORKSPACE, REPORT_DIR)
 

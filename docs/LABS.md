@@ -136,6 +136,15 @@ python -m pip install -e '.[api]'
 uvicorn rag_lab.api:app --reload
 ```
 
+ローカル学習画面では、APIキーなしで3機能をまとめて比較できます。
+
+```bash
+python -m pip install -e '.[ui,pdf]'
+rag-lab ui
+```
+
+画面で「Lab 5: 検索・要約・質問応答」を選び、実行前の予想を記録してから3機能を実行します。
+
 ### 作業
 
 検索は候補を返し、要約は1文書を圧縮し、QAは特定の問いへ答えます。3機能の入力・出力・評価指標を混同しないこと。FastAPIへ `/search` と `/summarize/{document_id}` を追加するのが発展課題です。
