@@ -130,24 +130,11 @@ def _boolean(value: Any, field: str) -> bool:
     return value
 
 
-def load_evaluation_report(path: Path, report_dir: Path) -> EvaluationReport:
-    root = report_dir.resolve()
-    try:
-        resolved = path.resolve(strict=True)
-    except OSError as error:
-        raise DiagnosticReportError("評価レポートを読み取れません") from error
-    if (
-        resolved.parent != root
-        or not REPORT_NAME_RE.fullmatch(resolved.name)
-        or path.is_symlink()
-    ):
-        raise DiagnosticReportError("reports直下のJSONだけを読み込めます")
-    try:
-        if resolved.stat().st_size > MAX_REPORT_BYTES:
-            raise DiagnosticReportError("評価レポートが5 MBを超えています")
-        value = json.loads(resolved.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
-        raise DiagnosticReportError("評価レポートのJSON形式が不正です") from error
+def evaluation_report_from_value(name: str, value: Any) -> EvaluationReport:
+    """Validate an evaluation value and retain only diagnostic-safe fields."""
+
+    if not REPORT_NAME_RE.fullmatch(name):
+        raise DiagnosticReportError("評価レポート名が不正です")
     if not isinstance(value, dict):
         raise DiagnosticReportError("評価レポートのルートはJSONオブジェクトが必要です")
 
@@ -210,7 +197,28 @@ def load_evaluation_report(path: Path, report_dir: Path) -> EvaluationReport:
         )
     if len(cases) != examples:
         raise DiagnosticReportError("summary.examplesとdetails件数が一致しません")
-    return EvaluationReport(name=resolved.name, summary=summary, cases=tuple(cases))
+    return EvaluationReport(name=name, summary=summary, cases=tuple(cases))
+
+
+def load_evaluation_report(path: Path, report_dir: Path) -> EvaluationReport:
+    root = report_dir.resolve()
+    try:
+        resolved = path.resolve(strict=True)
+    except OSError as error:
+        raise DiagnosticReportError("評価レポートを読み取れません") from error
+    if (
+        resolved.parent != root
+        or not REPORT_NAME_RE.fullmatch(resolved.name)
+        or path.is_symlink()
+    ):
+        raise DiagnosticReportError("reports直下のJSONだけを読み込めます")
+    try:
+        if resolved.stat().st_size > MAX_REPORT_BYTES:
+            raise DiagnosticReportError("評価レポートが5 MBを超えています")
+        value = json.loads(resolved.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as error:
+        raise DiagnosticReportError("評価レポートのJSON形式が不正です") from error
+    return evaluation_report_from_value(resolved.name, value)
 
 
 def compare_reports(

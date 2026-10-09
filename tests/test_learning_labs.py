@@ -34,6 +34,12 @@ from rag_lab.learning.lab5 import (
     run_lab5_experiment,
     save_lab5_experiment,
 )
+from rag_lab.learning.lab6 import (
+    Lab6Configuration,
+    evaluate_lab6,
+    run_lab6_experiment,
+    save_lab6_experiment,
+)
 
 
 ROOT = Path(__file__).parents[1]
@@ -432,6 +438,107 @@ class Lab5LearningTests(unittest.TestCase):
                 qa_question="有効な質問",
                 prompt_path=self.prompt,
             )
+
+
+class Lab6LearningTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.dataset = bundled_dataset(RAW_DIR)
+        self.prompt = ROOT / "prompts" / "answer_v2_grounded.txt"
+        self.baseline = Lab6Configuration()
+        self.candidate = Lab6Configuration(dimension=64)
+
+    def _experiment(self):
+        return run_lab6_experiment(
+            self.dataset,
+            baseline_configuration=self.baseline,
+            candidate_configuration=self.candidate,
+            changed_parameter="dimension",
+            gold_path=GOLD_PATH,
+            prompt_path=self.prompt,
+        )
+
+    def test_same_ten_cases_are_compared_after_one_parameter_change(self) -> None:
+        experiment = self._experiment()
+
+        self.assertEqual(experiment.baseline_report.summary["examples"], 10)
+        self.assertEqual(experiment.candidate_report.summary["examples"], 10)
+        self.assertEqual(
+            {case.case_id for case in experiment.baseline_report.cases},
+            {case.case_id for case in experiment.candidate_report.cases},
+        )
+        self.assertEqual(experiment.comparison.metric_deltas["keyword_recall"], -0.1)
+        self.assertEqual(experiment.comparison.new_failure_case_ids, ("europa-01",))
+
+    def test_exactly_one_declared_parameter_must_change(self) -> None:
+        with self.assertRaisesRegex(ValueError, "1項目"):
+            run_lab6_experiment(
+                self.dataset,
+                baseline_configuration=self.baseline,
+                candidate_configuration=self.baseline,
+                changed_parameter="dimension",
+                gold_path=GOLD_PATH,
+                prompt_path=self.prompt,
+            )
+        with self.assertRaisesRegex(ValueError, "1項目"):
+            run_lab6_experiment(
+                self.dataset,
+                baseline_configuration=self.baseline,
+                candidate_configuration=Lab6Configuration(
+                    search_mode="dense",
+                    dimension=64,
+                ),
+                changed_parameter="dimension",
+                gold_path=GOLD_PATH,
+                prompt_path=self.prompt,
+            )
+
+    def test_completion_requires_hypothesis_regression_and_next_action(self) -> None:
+        experiment = self._experiment()
+
+        incomplete = evaluate_lab6(
+            experiment,
+            prediction="低次元で精度が下がる",
+            hypothesis="",
+            observation="",
+            regression_note="",
+            next_action="",
+        )
+        complete = evaluate_lab6(
+            experiment,
+            prediction="低次元で必須語再現率が下がる",
+            hypothesis="衝突が増え根拠文の選択が変わる",
+            observation="必須語再現率が10ポイント低下した",
+            regression_note="europa-01が新しく失敗した",
+            next_action="次は検索方式だけを変える",
+        )
+
+        self.assertEqual(incomplete.status, "in_progress")
+        self.assertEqual(complete.status, "completed")
+
+    def test_saved_run_has_metrics_but_omits_answers_and_source_bodies(self) -> None:
+        experiment = self._experiment()
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / ".rag_lab"
+            saved = save_lab6_experiment(
+                workspace,
+                experiment,
+                prediction="低次元で精度が下がる",
+                hypothesis="ハッシュ衝突が増える",
+                observation="必須語再現率が低下した",
+                regression_note="europa-01が新しく失敗した",
+                next_action="検索方式だけを変える",
+            )
+            saved_text = saved.path.read_text(encoding="utf-8")
+            value = json.loads(saved_text)
+            progress = json.loads(
+                (workspace / "progress.json").read_text(encoding="utf-8")
+            )
+
+        self.assertEqual(value["summary"]["baseline"]["metrics"]["examples"], 10)
+        self.assertEqual(value["summary"]["new_failure_case_ids"], ["europa-01"])
+        self.assertNotIn("火星の砂嵐で太陽電池出力", saved_text)
+        self.assertNotIn(self.dataset.chunks[0].text, saved_text)
+        self.assertEqual(progress["labs"]["lab6"]["status"], "completed")
 
 
 if __name__ == "__main__":

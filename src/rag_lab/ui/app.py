@@ -23,6 +23,7 @@ from rag_lab.ui.lab3 import render_lab3
 from rag_lab.ui.diagnostics import render_diagnostics
 from rag_lab.ui.lab4 import render_lab4
 from rag_lab.ui.lab5 import render_lab5
+from rag_lab.ui.lab6 import render_lab6
 
 
 WORKSPACE = Path(".rag_lab")
@@ -51,7 +52,7 @@ def render_lab_catalog() -> None:
     st.subheader("8つのLab")
     for number, name in enumerate(LAB_NAMES, start=1):
         lab_id = f"lab{number}"
-        if number in {1, 2, 3, 4, 5}:
+        if number in {1, 2, 3, 4, 5, 6}:
             status = _progress_status(lab_id)
             availability = (
                 "オフライン模擬対応・Bedrock任意"
@@ -360,6 +361,7 @@ def main() -> None:
             "Lab 3: RAGパイプライン",
             "Lab 4: 任意LLM API連携",
             "Lab 5: 検索・要約・質問応答",
+            "Lab 6: 回答精度の評価・改善",
             "診断・比較: 評価結果と次の実験",
         ),
         key="selected_lab",
@@ -374,6 +376,8 @@ def main() -> None:
         render_lab4(WORKSPACE)
     elif selected_lab.startswith("Lab 5"):
         render_lab5(WORKSPACE)
+    elif selected_lab.startswith("Lab 6"):
+        render_lab6(WORKSPACE)
     else:
         render_diagnostics(WORKSPACE, REPORT_DIR)
 
