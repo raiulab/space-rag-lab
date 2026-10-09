@@ -40,6 +40,13 @@ from rag_lab.learning.lab6 import (
     run_lab6_experiment,
     save_lab6_experiment,
 )
+from rag_lab.learning.lab7 import (
+    analyze_prompt,
+    evaluate_jsonl_outputs,
+    evaluate_lab7,
+    run_lab7_experiment,
+    save_lab7_experiment,
+)
 
 
 ROOT = Path(__file__).parents[1]
@@ -539,6 +546,114 @@ class Lab6LearningTests(unittest.TestCase):
         self.assertNotIn("火星の砂嵐で太陽電池出力", saved_text)
         self.assertNotIn(self.dataset.chunks[0].text, saved_text)
         self.assertEqual(progress["labs"]["lab6"]["status"], "completed")
+
+
+class Lab7LearningTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.v1 = ROOT / "prompts" / "answer_v1.txt"
+        self.v2 = ROOT / "prompts" / "answer_v2_grounded.txt"
+        self.draft = self.v2.read_text(encoding="utf-8") + """
+
+7. 出力はJSONオブジェクトのみにする。
+8. 必須キーはanswer文字列、answerable真偽値、citationsのchunk_id文字列配列とする。
+"""
+        self.outputs = """{"answer":"根拠あり","answerable":true,"citations":["doc:p1:001"]}
+{"answer":"提供された文書では確認できません。","answerable":false,"citations":[]}"""
+
+    def _experiment(self):
+        return run_lab7_experiment(
+            prompt_v1_path=self.v1,
+            prompt_v2_path=self.v2,
+            draft_text=self.draft,
+            jsonl_outputs=self.outputs,
+        )
+
+    def test_v1_v2_and_v3_contracts_are_distinguished(self) -> None:
+        experiment = self._experiment()
+        v1_checks = {
+            check.code: check.passed for check in experiment.prompt_v1_analysis.checks
+        }
+        v2_checks = {
+            check.code: check.passed for check in experiment.prompt_v2_analysis.checks
+        }
+
+        self.assertFalse(v1_checks["evidence_only"])
+        self.assertFalse(v1_checks["document_instructions_untrusted"])
+        self.assertTrue(v2_checks["document_instructions_untrusted"])
+        self.assertFalse(v2_checks["json_contract"])
+        self.assertTrue(experiment.draft_analysis.passed)
+        self.assertIn("それまでの指示を無視", experiment.rendered_preview)
+
+    def test_json_contract_counts_syntax_and_schema_errors(self) -> None:
+        metrics = evaluate_jsonl_outputs(
+            '{"answer":"ok","answerable":true,"citations":[]}\n'
+            '{bad json}\n'
+            '{"answer":"missing types","answerable":"yes","citations":[]}\n'
+            '{"answer":"ok","answerable":true,"citations":[],"score":NaN}'
+        )
+
+        self.assertEqual(metrics.examples, 4)
+        self.assertEqual(metrics.syntax_errors, 2)
+        self.assertEqual(metrics.schema_errors, 1)
+        self.assertEqual(metrics.error_rate, 0.75)
+
+    def test_unescaped_json_braces_are_reported_safely(self) -> None:
+        invalid = self.draft + '\n例: {"answer": "value"}'
+
+        with self.assertRaisesRegex(ValueError, "波括弧"):
+            run_lab7_experiment(
+                prompt_v1_path=self.v1,
+                prompt_v2_path=self.v2,
+                draft_text=invalid,
+                jsonl_outputs=self.outputs,
+            )
+
+    def test_completion_and_save_preserve_old_versions_and_omit_prompt_body(self) -> None:
+        experiment = self._experiment()
+        completion = evaluate_lab7(
+            experiment,
+            prediction="v3はすべての構造検査を通過する",
+            change_reason="後続処理でJSON解析するため",
+            targeted_failure="出力形式が一定しない",
+            observation="JSON契約エラー率0%を確認した",
+        )
+        original_v2 = self.v2.read_text(encoding="utf-8")
+
+        with tempfile.TemporaryDirectory() as directory:
+            workspace = Path(directory) / ".rag_lab"
+            saved = save_lab7_experiment(
+                workspace,
+                experiment,
+                prediction="v3はすべての構造検査を通過する",
+                change_reason="後続処理でJSON解析するため",
+                targeted_failure="出力形式が一定しない",
+                observation="JSON契約エラー率0%を確認した",
+            )
+            run_text = saved.run.path.read_text(encoding="utf-8")
+            prompt_text = saved.prompt_path.read_text(encoding="utf-8")
+            progress = json.loads(
+                (workspace / "progress.json").read_text(encoding="utf-8")
+            )
+
+        self.assertEqual(completion.status, "completed")
+        self.assertEqual(prompt_text.strip(), self.draft.strip())
+        self.assertNotIn("あなたは宇宙技術文書", run_text)
+        self.assertEqual(self.v2.read_text(encoding="utf-8"), original_v2)
+        self.assertEqual(progress["labs"]["lab7"]["status"], "completed")
+
+    def test_missing_prompt_contract_is_detected_without_executing_it(self) -> None:
+        analysis = analyze_prompt(
+            "unsafe.json",
+            "{context}\n{question}\n{unknown:format}",
+        )
+
+        self.assertFalse(analysis.passed)
+        placeholder = next(
+            check
+            for check in analysis.checks
+            if check.code == "required_placeholders"
+        )
+        self.assertFalse(placeholder.passed)
 
 
 if __name__ == "__main__":

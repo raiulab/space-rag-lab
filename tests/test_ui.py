@@ -143,6 +143,27 @@ class StreamlitAppTests(unittest.TestCase):
         rendered_code = "\n".join(item.value for item in app.code)
         self.assertIn("europa-01", rendered_code)
 
+    def test_lab7_compares_prompt_contracts_and_json_examples(self) -> None:
+        from streamlit.testing.v1 import AppTest
+
+        app = AppTest.from_file(str(APP_PATH)).run(timeout=10)
+        app.selectbox[0].set_value("Lab 7: プロンプト設計").run(timeout=10)
+        app.text_area[2].set_value("JSONの後続処理を安定させる").run(
+            timeout=10
+        )
+        app.text_area[3].set_value("構造検査とJSON例は通過する").run(
+            timeout=10
+        )
+        app.button[0].click().run(timeout=10)
+
+        self.assertEqual(app.exception, [])
+        self.assertIn("Lab 7", app.header[0].value)
+        metric_labels = [metric.label for metric in app.metric]
+        self.assertIn("JSONL出力例", metric_labels)
+        self.assertIn("JSON契約エラー率", metric_labels)
+        rendered_text = "\n".join(item.value for item in app.markdown)
+        self.assertIn("v3案", rendered_text)
+
     def test_lab4_runs_offline_simulated_api_without_credentials(self) -> None:
         from streamlit.testing.v1 import AppTest
 
