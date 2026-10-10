@@ -7,6 +7,10 @@
 ### Added
 
 - 研究所文書のガバナンス、OCR・表、構造化抽出、文書比較、権限付き検索、API連携を扱う応用編設計書
+- 応用編Milestone A0の合成研究所文書8件・32ページ相当
+- corpus manifest、研究文書metadata、gold caseのJSON Schema
+- 回答不能7件と権限境界12件を含む評価case 29件
+- checksum、改訂循環、利用区分、評価構成を外部依存なしで検査するA0 validator
 
 ### Changed
 

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/space-rag-lab/gold-case.schema.json",
+  "title": "Applied course evaluation case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "case_id",
+    "task_type",
+    "question_or_field",
+    "expected_document_ids",
+    "expected_pages",
+    "required_values",
+    "required_units",
+    "expected_answerable",
+    "principal_groups",
+    "principal_clearance",
+    "allowed_result_document_ids",
+    "access_boundary"
+  ],
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{2,79}$"
+    },
+    "task_type": {
+      "type": "string",
+      "enum": ["question_answering", "document_comparison", "safety"]
+    },
+    "question_or_field": {"type": "string", "minLength": 2, "maxLength": 500},
+    "expected_document_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "expected_pages": {
+      "type": "array",
+      "items": {"type": "integer", "minimum": 1, "maximum": 200},
+      "uniqueItems": true
+    },
+    "required_values": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "required_units": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1},
+      "uniqueItems": true
+    },
+    "expected_answerable": {"type": "boolean"},
+    "principal_groups": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_-]{1,39}$"},
+      "uniqueItems": true
+    },
+    "principal_clearance": {
+      "type": "string",
+      "enum": ["public", "internal", "restricted"]
+    },
+    "allowed_result_document_ids": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true
+    },
+    "access_boundary": {"type": "boolean"}
+  }
+}

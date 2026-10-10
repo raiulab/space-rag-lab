@@ -24,12 +24,17 @@ APIキー不要のCLIとLab 1〜8のローカル学習ナビゲーションが�
 | APIキーなしの実行 | 対応 |
 | 自分のPDF | 文字レイヤー付きPDFに対応 |
 | OCR・表・図・一般画像解析 | 未対応 |
+| 応用編 Milestone A0 | 合成コーパス・schema・評価case実装済み |
 
 ## 応用編の計画
 
 基礎編の後に、研究所・技術部門の文書を扱う応用編を追加する設計です。文書コーパスと利用条件、OCR・表の抽出品質、根拠付き構造化抽出、複数文書比較、権限を考慮した検索、既存システムとのAPI連携を段階的に扱います。
 
-現在は設計段階で、応用機能はまだ実装していません。最初の実装は公開可能な合成研究所文書、manifest、研究メタデータ、評価問題を作るMilestone A0に限定します。詳細は[応用編設計書](docs/APPLIED_COURSE_DESIGN.md)を参照してください。
+応用編全体は設計済みです。Milestone A0として、公開可能な合成研究所文書8件・32ページ相当、JSON Schema、評価case 29件を追加しました。A0データは外部APIや任意依存なしで検査できます。Applied Lab 1のUI・CLIと実データ取り込みはまだ未実装です。詳細は[応用編設計書](docs/APPLIED_COURSE_DESIGN.md)と[合成データの説明](data/applied/README.md)を参照してください。
+
+```bash
+python -m rag_lab.applied.corpus data/applied
+```
 
 ## 対象者と前提知識
 

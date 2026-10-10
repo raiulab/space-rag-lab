@@ -29,7 +29,7 @@
 - Lab 7のプロンプト設計画面も実装済みです。v1/v2/v3案の契約をオフライン比較し、JSONL出力例の構文・schemaエラー率を測ります。v3案は既存版を上書きせず`.rag_lab/prompts/`へ保存します。
 - Lab 8のAWSデプロイ前準備画面も実装済みです。SAM設定とLambda相当のHTTP入出力をAWSなしで確認し、IAM、料金、後片付け計画を記録します。この完了はAWSへの実デプロイ済みを意味しません。
 - Lab 4・6・7・8を含む基礎編完成版はv0.3.0として公開済みです。タグとReleaseは検証済みの同じコミットを参照します。
-- 研究所文書向けの応用編は`docs/APPLIED_COURSE_DESIGN.md`で設計済みですが、まだ実装していません。最初の実装範囲は合成コーパスとschemaを作るMilestone A0です。
+- 研究所文書向けの応用編は`docs/APPLIED_COURSE_DESIGN.md`で設計済みです。Milestone A0の合成コーパス、schema、評価case、オフライン検査は実装済みで、次の候補はApplied Lab 1の縦切りです。
 
 最初に、次のファイルを読んでください。
 

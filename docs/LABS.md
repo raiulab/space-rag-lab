@@ -267,4 +267,4 @@ rag-lab evaluate --generator bedrock --prompt prompts/answer_v2_grounded.txt --r
 
 ## 基礎編修了後
 
-研究所・技術部門の文書を使った情報抽出、複数文書比較、権限付き検索、API連携は、基礎編と分離した応用編で扱います。現在は設計段階です。実装済みと誤解せず、[研究所文書RAG 応用編設計書](APPLIED_COURSE_DESIGN.md)の範囲とマイルストーンを確認してください。
+研究所・技術部門の文書を使った情報抽出、複数文書比較、権限付き検索、API連携は、基礎編と分離した応用編で扱います。設計とMilestone A0の合成コーパス・schema・評価caseまでは実装済みですが、Applied Lab 1以降のUI・CLIは未実装です。[研究所文書RAG 応用編設計書](APPLIED_COURSE_DESIGN.md)の範囲とマイルストーンを確認してください。

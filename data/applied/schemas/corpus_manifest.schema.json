@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/space-rag-lab/corpus-manifest.schema.json",
+  "title": "Applied course corpus manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "dataset_id",
+    "display_name",
+    "description",
+    "created_at",
+    "source_policy",
+    "license_or_terms",
+    "document_count",
+    "dataset_sha256",
+    "default_access_group",
+    "documents"
+  ],
+  "properties": {
+    "schema_version": {"type": "string", "const": "1.0"},
+    "dataset_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{2,79}$"
+    },
+    "display_name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "description": {"type": "string", "minLength": 1, "maxLength": 1000},
+    "created_at": {"type": "string", "format": "date-time"},
+    "source_policy": {
+      "type": "string",
+      "enum": ["synthetic", "public_licensed", "user_authorized_local"]
+    },
+    "license_or_terms": {"type": "string", "minLength": 1, "maxLength": 200},
+    "document_count": {"type": "integer", "minimum": 1},
+    "dataset_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "default_access_group": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z][a-z0-9_-]{1,39}$"
+    },
+    "documents": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "research_document_metadata.schema.json"}
+    }
+  }
+}
