@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-現在は最新の`0.2.x`を対象にセキュリティ修正を行います。
+現在は最新の`0.3.x`を対象にセキュリティ修正を行います。
 
 ## Reporting a vulnerability
 

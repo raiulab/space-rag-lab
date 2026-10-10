@@ -29,16 +29,18 @@
 - Lab 7のプロンプト設計画面も実装済みです。v1/v2/v3案の契約をオフライン比較し、JSONL出力例の構文・schemaエラー率を測ります。v3案は既存版を上書きせず`.rag_lab/prompts/`へ保存します。
 - Lab 8のAWSデプロイ前準備画面も実装済みです。SAM設定とLambda相当のHTTP入出力をAWSなしで確認し、IAM、料金、後片付け計画を記録します。この完了はAWSへの実デプロイ済みを意味しません。
 - Lab 4・6・7・8を含む基礎編完成版はv0.3.0として公開済みです。タグとReleaseは検証済みの同じコミットを参照します。
+- 研究所文書向けの応用編は`docs/APPLIED_COURSE_DESIGN.md`で設計済みですが、まだ実装していません。最初の実装範囲は合成コーパスとschemaを作るMilestone A0です。
 
 最初に、次のファイルを読んでください。
 
 1. `AGENTS.md`
 2. `docs/PROJECT_HANDOFF.md`
 3. `docs/LOCAL_LEARNING_APP_DESIGN.md`
-4. `README.md`
-5. `docs/LABS.md`
-6. `docs/CURSOR_AGENT_TASKS.md`
-7. `pyproject.toml`
+4. `docs/APPLIED_COURSE_DESIGN.md`
+5. `README.md`
+6. `docs/LABS.md`
+7. `docs/CURSOR_AGENT_TASKS.md`
+8. `pyproject.toml`
 
 その後、ファイルツリーと現在の実装を確認してください。文書の記述だけを信用せず、コード、テスト、評価データを根拠にしてください。
 

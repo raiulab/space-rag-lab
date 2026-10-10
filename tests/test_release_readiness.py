@@ -19,6 +19,7 @@ class ReleaseReadinessTests(unittest.TestCase):
             ".github/workflows/ci.yml",
             ".github/workflows/codeql.yml",
             ".github/dependabot.yml",
+            "docs/APPLIED_COURSE_DESIGN.md",
             "docs/releases/v0.1.0.md",
             "docs/releases/v0.1.1.md",
             "docs/releases/v0.2.0.md",
@@ -37,6 +38,7 @@ class ReleaseReadinessTests(unittest.TestCase):
         api_module = (PROJECT_ROOT / "src/rag_lab/api.py").read_text(
             encoding="utf-8"
         )
+        security = (PROJECT_ROOT / "SECURITY.md").read_text(encoding="utf-8")
 
         project_version = re.search(r'^version = "([^"]+)"$', pyproject, re.MULTILINE)
         module_version = re.search(r'^__version__ = "([^"]+)"$', package_init, re.MULTILINE)
@@ -46,6 +48,8 @@ class ReleaseReadinessTests(unittest.TestCase):
         self.assertEqual(project_version.group(1), "0.3.0")
         self.assertEqual(module_version.group(1), project_version.group(1))
         self.assertIn('version="0.3.0"', api_module)
+        major, minor, _ = project_version.group(1).split(".")
+        self.assertIn(f"`{major}.{minor}.x`", security)
         self.assertIn(
             'Repository = "https://github.com/raiulab/space-rag-lab"',
             pyproject,
