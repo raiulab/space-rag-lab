@@ -244,6 +244,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 - `README.md`: 概要とクイックスタート
 - `docs/LABS.md`: Lab 1〜8の実習ガイド
+- `docs/APPLIED_COURSE_DESIGN.md`: 研究所文書RAG応用編の実装前設計
 - `docs/CURSOR_AGENT_TASKS.md`: Agentへ渡す小さな課題例
 - `prompts/answer_v1.txt`: 単純な回答プロンプト
 - `prompts/answer_v2_grounded.txt`: 根拠、引用、拒否、文書内命令対策
@@ -410,6 +411,8 @@ GitHub Pagesは必要になった時点で、公開用ガイドまたはラン�
 
 2026-10-09にv0.3.0を公開した。Lab 4・6・7・8を公開範囲へまとめ、基礎編のLab 1〜8をAPIキーなしで一続きに学べる版とした。バージョン、変更履歴、README、専用リリースノート、リリース検査テストを更新し、PR #10の全CIとCodeQL成功後にタグとGitHub Releaseを作成した。タグはマージ済みコミット`3b40ddc`を参照し、検証用wheelは教材データとプロンプトを含まないためReleaseへ添付していない。
 
+2026-10-10に研究所文書RAG応用編の初期設計を確定した。基礎編Lab 1〜8を変更せず、`applied1`〜`applied6`として文書コーパスとガバナンス、OCR・表の抽出品質、根拠付き構造化抽出、複数文書比較、権限付き検索、API連携と実務評価を追加する。既定はローカル・オフラインで、実在機密文書は付属させない。権限は検索前にfail closedで適用し、初期実装は公開可能な合成研究所文書とschemaを作るMilestone A0だけに限定する。詳細は`docs/APPLIED_COURSE_DESIGN.md`を正とする。
+
 ## 11. 学習アプリの安全要件
 
 - 任意のシェル文字列を利用者入力から実行しない。
@@ -470,7 +473,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜8の画面と学習記録を追加した。v0.1.0、v0.1.1、v0.2.0、基礎編完成版v0.3.0をPublicリポジトリとGitHub Releaseで公開済みである。基礎編のLab 1〜8はローカルで通して学べる。ローカルGitの作者メールはGitHub noreply形式だが、一部のGitHubマージコミットにはアカウント側のメールアドレスが作者またはコミッター情報として残っている。v0.3.0のrebase mergeも作者はnoreplyを保持した一方、コミッターはGitHubアカウント側メールになった。既存タグを含む履歴書き換えは自動で行わない。今後新たな露出を避けるには、GitHubアカウント側のメール非公開設定を確認する。ブランチ名に`codex/`は使わず、機能開発は`feature/`、文書更新は`docs/`、リリース準備は`release/`を使う。次は応用編の設計範囲を確認してから、研究所文書対応、OCR・表・図、権限制御などを小さなマイルストーンへ分割する。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜8の画面と学習記録を追加した。v0.1.0、v0.1.1、v0.2.0、基礎編完成版v0.3.0をPublicリポジトリとGitHub Releaseで公開済みである。基礎編のLab 1〜8はローカルで通して学べる。GitHubプロフィールの公開メールを非表示にし、ローカルとグローバルGitの作者メールはGitHub noreply形式である。過去のGitHubマージコミットにあるアカウント側メールは履歴を書き換えず維持する。ブランチ名に`codex/`は使わず、機能開発は`feature/`、文書更新は`docs/`、リリース準備は`release/`を使う。応用編の初期設計は`docs/APPLIED_COURSE_DESIGN.md`に確定し、次の実装候補は合成研究所コーパスとschemaを作るMilestone A0である。
 
 ## 16. 参照したCodex運用方針
 

@@ -25,6 +25,12 @@ APIキー不要のCLIとLab 1〜8のローカル学習ナビゲーションが�
 | 自分のPDF | 文字レイヤー付きPDFに対応 |
 | OCR・表・図・一般画像解析 | 未対応 |
 
+## 応用編の計画
+
+基礎編の後に、研究所・技術部門の文書を扱う応用編を追加する設計です。文書コーパスと利用条件、OCR・表の抽出品質、根拠付き構造化抽出、複数文書比較、権限を考慮した検索、既存システムとのAPI連携を段階的に扱います。
+
+現在は設計段階で、応用機能はまだ実装していません。最初の実装は公開可能な合成研究所文書、manifest、研究メタデータ、評価問題を作るMilestone A0に限定します。詳細は[応用編設計書](docs/APPLIED_COURSE_DESIGN.md)を参照してください。
+
 ## 対象者と前提知識
 
 基本対象者は、Pythonの基本文法、関数、リスト・辞書、ファイル操作の基礎を理解し、ターミナルと仮想環境を手順に沿って扱える大学生・社会人です。割合や平均を読めれば十分で、専門的な統計知識は必要ありません。
@@ -274,6 +280,7 @@ ruff check .
 - v0.1.1リリースノート: [docs/releases/v0.1.1.md](docs/releases/v0.1.1.md)
 - v0.2.0リリースノート: [docs/releases/v0.2.0.md](docs/releases/v0.2.0.md)
 - v0.3.0リリースノート: [docs/releases/v0.3.0.md](docs/releases/v0.3.0.md)
+- 応用編設計書: [docs/APPLIED_COURSE_DESIGN.md](docs/APPLIED_COURSE_DESIGN.md)
 - 貢献方法: [CONTRIBUTING.md](CONTRIBUTING.md)
 - セキュリティ方針: [SECURITY.md](SECURITY.md)
 - 第三者パッケージ: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
