@@ -1,6 +1,6 @@
 # Space Research RAG Lab プロジェクト引き継ぎ書
 
-最終更新: 2026-10-09
+最終更新: 2026-10-10
 
 この文書は、旧スレッドで行った検討・実装・検証を、新しいCodexプロジェクトの新しいスレッドへ引き継ぐための永続的なコンテキストである。新しいスレッドは会話履歴を知っていると仮定せず、この文書、`AGENTS.md`、`README.md`、`docs/LABS.md`、実際のコードとテストを情報源として扱うこと。
 
@@ -215,6 +215,9 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `data/evaluation/gold.jsonl`: 評価質問10件
 - `data/processed/chunks.jsonl`: 生成済みチャンク20件
 - `data/index/index.jsonl`: 生成済み索引
+- `data/applied/corpus/`: 応用編A0の合成研究所文書8件・32ページ相当とmanifest
+- `data/applied/schemas/`: corpus、研究文書metadata、gold caseのJSON Schema
+- `data/applied/evaluation/gold.jsonl`: 回答不能7件と権限境界12件を含む評価case 29件
 
 ### 6.2 コア実装
 
@@ -232,6 +235,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 - `src/rag_lab/ui/`: Lab一覧、環境確認、Lab 1〜8、評価診断・比較の学習画面
 - `src/rag_lab/learning/diagnostics.py`: 評価レポート検証、失敗分類、比較、学習レポート
 - `src/rag_lab/cli.py`: ui、ingest、ingest-pdf、accept-pdf、index、search、ask、summarize、evaluate、all
+- `src/rag_lab/applied/corpus.py`: checksum、改訂関係、利用区分、評価構成を確認するA0オフライン検査
 
 ### 6.3 APIとAWS
 
@@ -251,7 +255,7 @@ LangGraphは現行の8 Labの学習範囲外である。将来、エージェン
 
 ### 6.5 テスト
 
-標準ライブラリの`unittest`で109件ある。UI/PDF extraがある環境ではStreamlitとPDFも検査する。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。Bedrockの単体テストは注入したテストクライアントを使い、AWSへ接続しない。2026-10-09の`feature/lab8-aws-readiness-ui`では109件すべて成功した。
+標準ライブラリの`unittest`で117件ある。UI/PDF extraがある環境ではStreamlitとPDFも検査する。任意extraがない環境では、PDF解析とStreamlitを必要とするテストだけをskipし、コアのテスト経路を維持する。Bedrockの単体テストは注入したテストクライアントを使い、AWSへ接続しない。2026-10-10の`feature/applied-a0-corpus`ではA0検査を含む117件すべて成功した。
 
 ```bash
 PYTHONPATH=src python3 -m unittest discover -s tests -v
@@ -413,6 +417,8 @@ GitHub Pagesは必要になった時点で、公開用ガイドまたはラン�
 
 2026-10-10に研究所文書RAG応用編の初期設計を確定した。基礎編Lab 1〜8を変更せず、`applied1`〜`applied6`として文書コーパスとガバナンス、OCR・表の抽出品質、根拠付き構造化抽出、複数文書比較、権限付き検索、API連携と実務評価を追加する。既定はローカル・オフラインで、実在機密文書は付属させない。権限は検索前にfail closedで適用し、初期実装は公開可能な合成研究所文書とschemaを作るMilestone A0だけに限定する。詳細は`docs/APPLIED_COURSE_DESIGN.md`を正とする。
 
+同日、Milestone A0を実装した。`data/applied/`に架空先端材料研究所の合成文書8件・32ページ相当、2組の改訂関係、public・internal・restrictedの3区分、表、文書内命令fixtureを追加した。評価は29件で、回答不能7件、権限境界12件を含む。corpus manifest、研究文書metadata、gold caseはJSON Schema draft 2020-12で定義した。`python -m rag_lab.applied.corpus data/applied`はSHA-256、相対パス、front matter、ページ、改訂循環、権限期待値、case構成をネットワークと任意依存なしで検査する。OCR、表構造抽出、権限付きretriever、Applied UI・CLIはまだ実装していない。
+
 ## 11. 学習アプリの安全要件
 
 - 任意のシェル文字列を利用者入力から実行しない。
@@ -473,7 +479,7 @@ PYTHONPATH=src python3 -m rag_lab.cli all
 
 UI方式、対象者、Lab 1の範囲、PDF対応、進捗保存、CLI、安全要件、テスト、受け入れ条件は合意済みである。新しいスレッドで技術方式を再比較せず、`docs/LOCAL_LEARNING_APP_DESIGN.md`を実装の基準にする。
 
-Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜8の画面と学習記録を追加した。v0.1.0、v0.1.1、v0.2.0、基礎編完成版v0.3.0をPublicリポジトリとGitHub Releaseで公開済みである。基礎編のLab 1〜8はローカルで通して学べる。GitHubプロフィールの公開メールを非表示にし、ローカルとグローバルGitの作者メールはGitHub noreply形式である。過去のGitHubマージコミットにあるアカウント側メールは履歴を書き換えず維持する。ブランチ名に`codex/`は使わず、機能開発は`feature/`、文書更新は`docs/`、リリース準備は`release/`を使う。応用編の初期設計は`docs/APPLIED_COURSE_DESIGN.md`に確定し、次の実装候補は合成研究所コーパスとschemaを作るMilestone A0である。
+Gitは初期化済みである。PDF取り込み基盤からLab 3まで`feature/lab1-pdf-ingestion`ブランチで実装し、`main`へfast-forwardした。Lab 1〜3で文書加工、検索比較、根拠付き回答の一連のローカル学習経路が動く。Milestone 3では評価診断、変更前後比較、段階的ヒント、学習レポートを追加した。続けてLab 4〜8の画面と学習記録を追加した。v0.1.0、v0.1.1、v0.2.0、基礎編完成版v0.3.0をPublicリポジトリとGitHub Releaseで公開済みである。基礎編のLab 1〜8はローカルで通して学べる。GitHubプロフィールの公開メールを非表示にし、ローカルとグローバルGitの作者メールはGitHub noreply形式である。過去のGitHubマージコミットにあるアカウント側メールは履歴を書き換えず維持する。ブランチ名に`codex/`は使わず、機能開発は`feature/`、文書更新は`docs/`、リリース準備は`release/`を使う。応用編の初期設計とMilestone A0は完了し、次はA0データの人手レビュー後にApplied Lab 1の縦切りへ進む。
 
 ## 16. 参照したCodex運用方針
 

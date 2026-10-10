@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/space-rag-lab/research-document-metadata.schema.json",
+  "title": "Research document metadata",
+  "description": "Metadata for one synthetic or user-authorized research document.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "document_id",
+    "title",
+    "source",
+    "document_type",
+    "organization",
+    "project",
+    "revision",
+    "published_date",
+    "language",
+    "classification",
+    "allowed_groups",
+    "license_or_terms",
+    "sha256",
+    "supersedes_document_id",
+    "page_count"
+  ],
+  "properties": {
+    "document_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9_-]{2,79}$"
+    },
+    "title": {"type": "string", "minLength": 1, "maxLength": 200},
+    "source": {
+      "type": "string",
+      "pattern": "^documents/[A-Za-z0-9_.-]+\\.(md|txt|pdf)$"
+    },
+    "document_type": {
+      "type": "string",
+      "enum": [
+        "research_report",
+        "standard_operating_procedure",
+        "monitoring_report",
+        "calibration_record",
+        "incident_review",
+        "revision_notice"
+      ]
+    },
+    "organization": {"type": "string", "minLength": 1, "maxLength": 200},
+    "project": {"type": "string", "minLength": 1, "maxLength": 200},
+    "revision": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+$"},
+    "published_date": {"type": "string", "format": "date"},
+    "language": {"type": "string", "enum": ["ja", "en"]},
+    "classification": {
+      "type": "string",
+      "enum": ["public", "internal", "restricted"]
+    },
+    "allowed_groups": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_-]{1,39}$"},
+      "uniqueItems": true
+    },
+    "license_or_terms": {"type": "string", "minLength": 1, "maxLength": 200},
+    "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "supersedes_document_id": {
+      "type": ["string", "null"],
+      "pattern": "^[a-z0-9][a-z0-9_-]{2,79}$"
+    },
+    "page_count": {"type": "integer", "minimum": 1, "maximum": 200}
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {"classification": {"const": "public"}},
+        "required": ["classification"]
+      },
+      "then": {"properties": {"allowed_groups": {"maxItems": 0}}}
+    },
+    {
+      "if": {
+        "properties": {
+          "classification": {"enum": ["internal", "restricted"]}
+        },
+        "required": ["classification"]
+      },
+      "then": {"properties": {"allowed_groups": {"minItems": 1}}}
+    }
+  ]
+}
