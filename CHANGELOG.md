@@ -11,6 +11,7 @@
 - corpus manifest、研究文書metadata、gold caseのJSON Schema
 - 回答不能7件と権限境界12件を含む評価case 29件
 - checksum、改訂循環、利用区分、評価構成を外部依存なしで検査するA0 validator
+- 現在の習得範囲と、AIエージェント・データ分析基盤・要件定義の発展コース構想
 
 ### Changed
 
